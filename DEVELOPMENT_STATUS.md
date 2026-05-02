@@ -191,6 +191,13 @@
 - Whisper.cpp WASM (음성 파일 → 자동 자막)
 - Pixabay BGM 프리셋
 
+### 6.7 저장 한도 도달 시 외부 통합 (사용자 합의 — 보류)
+- 현재: Supabase Free 500MB DB 로 충분 (텍스트만 저장)
+- 향후 영상·고해상도 이미지 원본 보관 필요 시:
+  - **Notion** workspace 무료 (대용량 문서·자료 보관)
+  - **Cloudinary** 25GB 무료 (브랜드 자산 DAM)
+- 위키 페이지 `source` 필드에 외부 URL 링크하는 방식
+
 ---
 
 ## 7. 기술 스택 요약
