@@ -4,6 +4,8 @@
 export interface ParsedSlide {
   title: string;
   body: string;
+  // /remake 등에서 미리 생성된 이미지 URL 을 함께 전달할 때 사용 (옵셔널).
+  imageUrl?: string;
 }
 
 /**
