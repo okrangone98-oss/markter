@@ -246,6 +246,11 @@ export default function StudioPage() {
               onChange={(e) => setTopic(e.target.value)}
               placeholder="콘텐츠의 핵심 주제·상황·맥락을 설명하세요"
             />
+            {error && (
+              <div className="rounded-md border border-red-500/30 bg-red-500/10 p-2 text-[11px] text-red-300">
+                ⚠ {error}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -273,15 +278,15 @@ export default function StudioPage() {
               <StopCircle className="h-4 w-4" /> 중지
             </Button>
           ) : (
-            <Button onClick={handleGenerate} className="w-full" size="lg">
+            <Button
+              onClick={handleGenerate}
+              className="w-full"
+              size="lg"
+              disabled={!topic.trim()}
+              title={!topic.trim() ? "주제를 먼저 입력하세요" : undefined}
+            >
               <Send className="h-4 w-4" /> 생성하기
             </Button>
-          )}
-
-          {error && (
-            <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
-              ⚠ {error}
-            </div>
           )}
         </div>
 
