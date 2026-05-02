@@ -287,7 +287,7 @@ function drawSlide(
    Video Maker 컴포넌트
    ══════════════════════════════════════════════════════════ */
 export default function VideoPage() {
-  const { ttsResult } = useTTSVideoStore();
+  const { ttsResult, pendingSlides, setPendingSlides } = useTTSVideoStore();
 
   const [state, setState] = useState<VideoState>({
     ratio: "9:16",
@@ -323,6 +323,21 @@ export default function VideoPage() {
       setState((s) => ({ ...s, narration: ttsResult }));
     }
   }, [ttsResult]);
+
+  /* Studio → Video: pendingSlides 자동 임포트 (한 번만 소비 후 초기화) */
+  useEffect(() => {
+    if (pendingSlides && pendingSlides.length > 0) {
+      const newSlides = pendingSlides.map((s) => ({
+        id: uid(),
+        title: s.title,
+        body: s.body,
+        imageUrl: null,
+        imageFile: null,
+      }));
+      setState((s) => ({ ...s, slides: newSlides }));
+      setPendingSlides(null); // 1회만 소비
+    }
+  }, [pendingSlides, setPendingSlides]);
 
   /* 슬라이드 0번 프레임 초기 렌더 */
   useEffect(() => {
