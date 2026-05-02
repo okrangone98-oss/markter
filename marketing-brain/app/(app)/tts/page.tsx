@@ -111,7 +111,7 @@ function charEstimateSec(text: string): number {
    TTS 페이지 컴포넌트
    ══════════════════════════════════════════════════════════ */
 export default function TTSPage() {
-  const { setTTSResult } = useTTSVideoStore();
+  const { setTTSResult, pendingTtsText, setPendingTtsText } = useTTSVideoStore();
 
   const [engine, setEngine] = useState<Engine>("neural");
   const [voices, setVoices] = useState<VoiceOption[]>([]);
@@ -144,6 +144,14 @@ export default function TTSPage() {
       }
     });
   }, []);
+
+  /* Studio → TTS 텍스트 자동 채우기 */
+  useEffect(() => {
+    if (pendingTtsText) {
+      setText(pendingTtsText);
+      setPendingTtsText(null); // 1회 소비 후 초기화
+    }
+  }, [pendingTtsText, setPendingTtsText]);
 
   /* 엔진 변경 시 보이스 목록 갱신 */
   useEffect(() => {
