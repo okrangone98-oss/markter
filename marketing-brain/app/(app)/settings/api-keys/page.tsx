@@ -12,7 +12,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface ProviderInfo {
-  id: "openai" | "anthropic" | "replicate" | "elevenlabs";
+  id: "openai" | "anthropic" | "google" | "replicate" | "elevenlabs";
   name: string;
   desc: string;
   prefix: string;
@@ -41,6 +41,15 @@ const PROVIDERS: ProviderInfo[] = [
     costHint: "Sonnet 4.6 1K토큰 ~$0.003 · Opus 약 5x",
   },
   {
+    id: "google",
+    name: "Google AI Studio",
+    desc: "Gemini 2.5 Pro · Gemma 4 · 영상 직접 분석 (Vision) 가능",
+    prefix: "AIza...",
+    signupUrl: "https://aistudio.google.com/app/apikey",
+    models: "텍스트·이미지·영상 분석 (60초 Shorts 인풋 가능)",
+    costHint: "무료 5 RPM · 유료 1K토큰 ~$0.001 (가장 저렴)",
+  },
+  {
     id: "replicate",
     name: "Replicate",
     desc: "Seedance 2.0 · Veo 3 · Flux · Kling · PuLID 페이스 스왑",
@@ -63,6 +72,7 @@ const PROVIDERS: ProviderInfo[] = [
 interface KeyStatus {
   openai: boolean;
   anthropic: boolean;
+  google: boolean;
   replicate: boolean;
   elevenlabs: boolean;
 }

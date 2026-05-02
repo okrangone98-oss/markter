@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const PROVIDERS = ["openai", "anthropic", "replicate", "elevenlabs"] as const;
+const PROVIDERS = ["openai", "anthropic", "google", "replicate", "elevenlabs"] as const;
 type Provider = (typeof PROVIDERS)[number];
 
 function isProvider(s: string): s is Provider {
@@ -27,6 +27,7 @@ export async function GET() {
   const row = (data as Array<{
     has_openai: boolean;
     has_anthropic: boolean;
+    has_google: boolean;
     has_replicate: boolean;
     has_elevenlabs: boolean;
     updated_at: string;
@@ -36,6 +37,7 @@ export async function GET() {
     keys: {
       openai: row?.has_openai ?? false,
       anthropic: row?.has_anthropic ?? false,
+      google: row?.has_google ?? false,
       replicate: row?.has_replicate ?? false,
       elevenlabs: row?.has_elevenlabs ?? false,
     },
