@@ -4,6 +4,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   WandSparkles,
   Send,
@@ -11,16 +12,20 @@ import {
   Copy,
   Download,
   RefreshCw,
+  Film,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip } from "@/components/ui/tooltip";
 import { streamGenerate } from "@/lib/llm/client";
 import { INITIAL_PROFILES } from "@/lib/llm/profiles";
 import { TONE_MAP, TYPE_INSTRUCTIONS } from "@/lib/llm/prompts";
 import type { ContentType, ToneStyle } from "@/lib/llm/types";
+import { useTTSVideoStore } from "@/lib/stores/tts-video";
+import { parseScriptToSlides } from "@/lib/video/parse-script";
 
 // 콘텐츠 타입 한국어 라벨 (드롭다운 표시용)
 const TYPE_LABELS: Record<ContentType, string> = {
@@ -65,6 +70,9 @@ const PROFILE_LABELS: Record<string, string> = {
 };
 
 export default function StudioPage() {
+  const router = useRouter();
+  const setPendingSlides = useTTSVideoStore((s) => s.setPendingSlides);
+
   // ── 폼 상태 ──
   const [profile, setProfile] = useState<string>("pakchaenam");
   const [type, setType] = useState<ContentType>("blog_intro");
@@ -145,6 +153,14 @@ export default function StudioPage() {
     a.download = `marketing-brain-${type}-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleSendToVideo() {
+    if (!result.trim()) return;
+    const slides = parseScriptToSlides(result);
+    if (slides.length === 0) return;
+    setPendingSlides(slides);
+    router.push("/video");
   }
 
   return (
@@ -330,6 +346,17 @@ export default function StudioPage() {
                 >
                   <RefreshCw className="h-3 w-3" /> 재생성
                 </Button>
+                <Tooltip content="결과를 자동으로 슬라이드로 분할해 영상 메이커에 전송합니다.">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSendToVideo}
+                    disabled={generating || !result.trim()}
+                    className="h-7 text-xs text-[var(--color-primary)]"
+                  >
+                    <Film className="h-3 w-3" /> 영상 메이커로
+                  </Button>
+                </Tooltip>
               </div>
             )}
           </div>
