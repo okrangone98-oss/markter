@@ -1,6 +1,9 @@
 // 루트 레이아웃 — 모든 페이지를 감싼다.
 // 다크 테마를 기본으로, 한국어 lang 설정.
+// TooltipProvider 를 최상단에 마운트해 어디서든 <Tooltip> 사용 가능하게 함.
 import type { Metadata } from "next";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
@@ -18,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-[var(--color-background)] text-slate-100">
-        {children}
+        <TooltipProvider delayDuration={250} skipDelayDuration={100}>
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   );
