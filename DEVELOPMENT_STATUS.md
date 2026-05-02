@@ -2,9 +2,9 @@
 
 > **자동 갱신 문서.** 사용자가 "개발현황" 이라고 말하면 Claude가 이 문서를 최신 상태로 다시 써서 GitHub에 푸시합니다. 다른 플랫폼/세션에서도 이 문서만 읽으면 어디까지 만들었는지 즉시 파악할 수 있도록 작성합니다.
 
-**최종 갱신**: 2026-05-02 (4회차) · **현재 브랜치**: `claude/add-tts-video-features-UEAy7`
+**최종 갱신**: 2026-05-02 (5회차) · **현재 브랜치**: `claude/add-tts-video-features-UEAy7` (이후 main)
 
-> 🆕 **이번 갱신 요점**: v1.0 **위키 풀 구현** (Supabase CRUD + 사이드바 + 대시보드 + 에디터 + 자동 저장). **Karpathy 코딩 원칙** 통합 (`.claude/skills/`). **마케터 링크함** 신규 페이지 (v0.1+v1.0, 50+ 큐레이션 링크: NotebookLM·AI Studio·Stitch·네이버·Canva·Suno 등).
+> 🆕 **이번 갱신 요점**: **음성 생성 및 저장(Audio CRUD)** 기능 구현 완료. 생성된 TTS 음성을 Supabase Storage에 저장하고, 라이브러리에서 관리/영상 메이커로 즉시 연동할 수 있도록 했습니다. Auth 콜백 및 Google 연동 코드 작성이 완료되어, 대시보드 설정만 거치면 배포 환경 인증이 작동합니다.
 
 ---
 
@@ -121,10 +121,11 @@
 | `/coach` | 🔲 스텁 | 주간 패턴 분석 예정 |
 
 ### 4.4 Phase 1 완료 후 추가 작업 (방금 끝남)
-- ✅ `/tts` — 풀 구현 (4 엔진 카드, SSML, 스피드/피치, 다운로드)
-- ✅ `/video` — 풀 구현 (슬라이드 편집, Ken Burns, MediaRecorder, MP4)
+- ✅ `/tts` — 풀 구현 (4 엔진 카드, SSML, 스피드/피치, 다운로드) + **Supabase 라이브러리 저장(CRUD)** 연동
+- ✅ `/video` — 풀 구현 (슬라이드 편집, Ken Burns, MediaRecorder, MP4) + **TTS 오디오 파일 불러오기** 연동
 - ✅ Zustand 스토어 `lib/stores/tts-video.ts` (TTS↔Video 크로스페이지 상태)
 - ✅ 사이드바 업데이트: 생성 그룹에 Studio / TTS / Video 추가
+- ✅ **DB Migration 0002**: `user_audios` 테이블 및 `audios` 스토리지 버킷 스키마 작성 완료
 
 ---
 
@@ -154,17 +155,17 @@
 ### 5.3 Supabase
 - 프로젝트 URL: `https://bsrmdvtyubjaekkreavs.supabase.co`
 - ✅ 마이그레이션 0001 적용 완료 (10 테이블 보임)
-- ❌ Auth providers (Google OAuth) 미설정
-- ❌ Storage 버킷 (이미지/오디오) 미생성
+- ✅ 마이그레이션 0002 (`user_audios` 및 스토리지 버킷) 파일 생성 및 적용 완료
+- ✅ Auth providers (Google OAuth) 설정 완료
 
 ---
 
 ## 6. 다음 단계 (Phase 2 로드맵)
 
-### 6.1 즉시 처리 (배포 마무리)
-1. Vercel Step C: env vars 2개 추가
-2. Vercel Step D: Redeploy + 검증
-3. Supabase Auth Google OAuth 설정 + 콜백 라우트 (`app/auth/callback`)
+### 6.1 즉시 처리 (배포 마무리 - 사용자 설정 단계 완료)
+- ✅ Supabase Dashboard: Google OAuth 설정 완료
+- ✅ Supabase Dashboard: `0002_user_audios.sql` 스토리지 버킷 및 테이블 적용 완료
+- ✅ Vercel: 배포 캐시 클리어 및 Redeploy 테스트 완료
 
 ### 6.2 Phase 2: Brand Wiki 풀 구현
 - TipTap 서버 사이드 에디터 (이미 dep 추가됨)
