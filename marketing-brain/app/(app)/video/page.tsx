@@ -310,6 +310,7 @@ export default function VideoPage() {
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
   const [toast, setToast] = useState("");
+  const [generatingTTS, setGeneratingTTS] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
@@ -323,6 +324,16 @@ export default function VideoPage() {
       setState((s) => ({ ...s, narration: ttsResult }));
     }
   }, [ttsResult]);
+
+  /* Puter SDK 동적 로드 */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (document.getElementById("puter-sdk")) return;
+    const s = document.createElement("script");
+    s.id = "puter-sdk";
+    s.src = "https://js.puter.com/v2/";
+    document.head.appendChild(s);
+  }, []);
 
   /* Studio → Video: pendingSlides 자동 임포트 (한 번만 소비 후 초기화) */
   useEffect(() => {
@@ -479,6 +490,38 @@ export default function VideoPage() {
       ...s,
       narration: { name: file.name, blob: file, url },
     }));
+  }
+
+  async function generateSlideTTS() {
+    const text = state.slides.map(s => s.title + " " + s.body).join(" ... ").trim();
+    if (!text || text === " ... ") {
+      showToast("⚠ 슬라이드에 텍스트가 없습니다.");
+      return;
+    }
+    setGeneratingTTS(true);
+    showToast("음성 생성 중 (무료 TTS)...");
+    try {
+      const w = window as any;
+      if (!w.puter?.ai?.txt2speech) throw new Error("Puter SDK가 아직 준비되지 않았습니다. 페이지를 새로고침 해주세요.");
+      
+      const audio = await w.puter.ai.txt2speech(text, { voice: "Seoyeon", engine: "neural" });
+      const src = audio.src || audio.currentSrc;
+      if (!src) throw new Error("오디오 소스를 받을 수 없습니다.");
+      
+      const resp = await fetch(src);
+      const blob = await resp.blob();
+      
+      const url = URL.createObjectURL(blob);
+      setState((s) => ({
+        ...s,
+        narration: { name: "자동생성_내레이션.mp3", blob, url },
+      }));
+      showToast("✓ 슬라이드 내레이션 자동 생성 완료!");
+    } catch (e: any) {
+      showToast("⚠ 음성 생성 실패: " + e.message);
+    } finally {
+      setGeneratingTTS(false);
+    }
   }
 
   /* ── WebM/MP4 렌더링 ── */
@@ -794,7 +837,7 @@ export default function VideoPage() {
                 <Label className="flex items-center gap-1.5">
                   <Mic className="h-3.5 w-3.5" /> 내레이션 (TTS 음성)
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <label className="cursor-pointer">
                     <input
                       type="file"
@@ -806,7 +849,19 @@ export default function VideoPage() {
                       <Upload className="h-3.5 w-3.5" /> 파일 업로드
                     </span>
                   </label>
-                  <span className="flex-1 truncate text-xs text-slate-500">
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs bg-slate-800 border-slate-700 hover:bg-[var(--color-primary)]/20 hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/50 text-slate-300"
+                    onClick={generateSlideTTS}
+                    disabled={generatingTTS}
+                  >
+                    <Mic className="h-3 w-3 mr-1" />
+                    {generatingTTS ? "생성 중..." : "슬라이드 텍스트로 무료 자동생성"}
+                  </Button>
+
+                  <span className="flex-1 truncate text-xs text-slate-500 w-full mt-1">
                     {state.narration
                       ? state.narration.name
                       : ttsResult
@@ -816,7 +871,7 @@ export default function VideoPage() {
                 </div>
                 {!ttsResult && !state.narration && (
                   <p className="text-[11px] text-slate-600">
-                    💡 AI 음성 페이지에서 생성 후 여기에 자동 연결됩니다.
+                    💡 다른 엔진(ElevenLabs 등)이 필요하면 <b>AI 음성 합성(TTS)</b> 메뉴에서 만들 수 있습니다.
                   </p>
                 )}
               </div>
