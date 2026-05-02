@@ -16,6 +16,7 @@ import {
   Sparkles,
   Brain,
   ExternalLink,
+  Key,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -64,7 +65,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: "도구함",
-    items: [{ href: "/links", label: "링크 모음", icon: ExternalLink }],
+    items: [
+      { href: "/links", label: "링크 모음", icon: ExternalLink },
+      { href: "/settings/api-keys", label: "API 키 (BYOK)", icon: Key },
+    ],
   },
 ];
 
