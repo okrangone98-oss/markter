@@ -2,9 +2,9 @@
 
 > **자동 갱신 문서.** 사용자가 "개발현황" 이라고 말하면 Claude가 이 문서를 최신 상태로 다시 써서 GitHub에 푸시합니다. 다른 플랫폼/세션에서도 이 문서만 읽으면 어디까지 만들었는지 즉시 파악할 수 있도록 작성합니다.
 
-**최종 갱신**: 2026-05-02 (2회차) · **현재 브랜치**: `claude/add-tts-video-features-UEAy7`
+**최종 갱신**: 2026-05-02 (3회차) · **현재 브랜치**: `claude/add-tts-video-features-UEAy7`
 
-> 🆕 **이번 갱신 요점**: Vercel 환경변수 6개 모두 추가 완료(Step C ✅). Sensitive 토글로 인한 진입 장벽 해결. Redeploy 클릭만 남음(Step D). v0.1·v1.0 구분 명확화.
+> 🆕 **이번 갱신 요점**: 위키 **지식 대시보드** 추가 (Obsidian Dashboard++ / Outline / github-readme-stats 패턴 참조). Google Sheets 다중 엔드포인트 폴백으로 HTTP 400 자동 회피. Vercel 배포 Step C 완료, Step D Redeploy 진행 중.
 
 ---
 
@@ -70,7 +70,8 @@
 | Wiki Ingest/Query/Lint | ✅ | LLM 기반 |
 | AI 자동 개선 루프 | ✅ | autoresearch (5축 평가 + 재생성 N회) |
 | 위키 컨텍스트 자동 주입 | ✅ | buildPrompt 래퍼 |
-| **위키 파일 업로드** | ✅ | **NEW** Excel · PDF · CSV · Google Sheets |
+| **위키 파일 업로드** | ✅ | Excel · PDF · CSV · Google Sheets (다중 엔드포인트 폴백) |
+| **위키 지식 대시보드** | ✅ | **NEW** 4 stat cards + 카테고리 분포 + 최근/공백/태그/출처 + 14일 히트맵 |
 | 차트 분석 | ✅ | Chart.js |
 | 위키 JSON 백업/복원 | ✅ | |
 | experiments 로그 | ✅ | LocalStorage `flowai_experiments` |

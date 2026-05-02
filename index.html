@@ -569,6 +569,80 @@ input[type="range"]::-moz-range-thumb{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:50px 20px;color:var(--muted);
 }
+
+/* ── 지식 대시보드 (Knowledge Dashboard) ── */
+.wiki-dashboard{padding:8px 4px;max-width:100%}
+.wiki-dash-greeting{font-size:0.95rem;color:var(--text);margin-bottom:18px;line-height:1.6}
+.wiki-dash-greeting b{color:var(--cyan)}
+.wiki-dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+@media (max-width:900px){.wiki-dash-stats{grid-template-columns:repeat(2,1fr)}}
+.wiki-stat-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;padding:14px 16px;
+}
+.wiki-stat-num{font-size:1.9rem;font-weight:700;color:var(--cyan);line-height:1.1;letter-spacing:-0.5px}
+.wiki-stat-num small{font-size:0.5em;color:var(--muted2);font-weight:500;letter-spacing:0}
+.wiki-stat-label{font-size:0.66rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted2);margin-top:6px;font-weight:600}
+.wiki-section-title{
+  font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;
+  color:var(--muted2);margin:22px 0 10px;
+}
+.wiki-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:900px){.wiki-cat-grid{grid-template-columns:repeat(2,1fr)}}
+.wiki-cat-tile{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:10px;padding:11px 12px;cursor:pointer;transition:all 0.15s;
+}
+.wiki-cat-tile:hover{border-color:var(--cyan-border);transform:translateY(-1px);background:rgba(255,255,255,0.05)}
+.wiki-cat-tile-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:6px}
+.wiki-cat-tile-name{font-size:0.78rem;font-weight:600;color:var(--text)}
+.wiki-cat-tile-count{font-size:1.3rem;font-weight:700;color:var(--cyan);margin:2px 0 7px;line-height:1}
+.wiki-cat-tile-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.wiki-cat-tile-bar > div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:2px;transition:width 0.3s}
+.wiki-gap-badge{font-size:0.62rem;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:0.3px}
+.wiki-gap-badge.critical{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.wiki-gap-badge.low{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3)}
+.wiki-dash-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+@media (max-width:900px){.wiki-dash-2col{grid-template-columns:1fr}}
+.wiki-dash-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;padding:12px 14px;
+}
+.wiki-recent-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 8px;border-radius:6px;cursor:pointer;transition:background 0.15s;gap:8px;
+}
+.wiki-recent-item:hover{background:rgba(255,255,255,0.04)}
+.wiki-recent-title{
+  font-size:0.82rem;color:var(--text);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.wiki-recent-meta{font-size:0.68rem;color:var(--muted2);margin-top:2px}
+.wiki-recent-time{font-size:0.68rem;color:var(--muted2);white-space:nowrap}
+.wiki-tag-chip{
+  display:inline-block;padding:3px 8px;margin:2px 3px 2px 0;border-radius:12px;
+  background:rgba(167,139,250,0.12);color:var(--purple);
+  border:1px solid rgba(167,139,250,0.25);cursor:pointer;transition:all 0.12s;
+}
+.wiki-tag-chip:hover{background:rgba(167,139,250,0.22);transform:translateY(-1px)}
+.wiki-tag-chip small{opacity:0.6;margin-left:2px}
+.wiki-source-row{
+  display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted2);
+  padding:4px 0;border-bottom:1px dashed rgba(255,255,255,0.05);
+}
+.wiki-source-row:last-child{border:0}
+.wiki-source-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px}
+.wiki-heatmap{display:grid;grid-template-columns:repeat(14,1fr);gap:3px;margin-top:6px}
+.wiki-heatmap-cell{aspect-ratio:1;border-radius:3px;background:rgba(0,229,200,0.08);transition:transform 0.15s}
+.wiki-heatmap-cell:hover{transform:scale(1.15)}
+.wiki-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.wiki-back-btn{
+  display:inline-flex;align-items:center;gap:4px;padding:5px 10px;
+  background:transparent;border:1px solid var(--border);color:var(--muted2);
+  border-radius:6px;font-size:0.74rem;cursor:pointer;transition:all 0.12s;
+}
+.wiki-back-btn:hover{border-color:var(--cyan-border);color:var(--cyan)}
+
 .wiki-toolbar{display:flex;gap:8px;margin-bottom:8px}
 .wiki-toolbar > input{flex:1}
 .wiki-editor-row{
@@ -1470,17 +1544,12 @@ input[type="range"]::-moz-range-thumb{
         </aside>
 
         <main class="wiki-main">
-          <div id="wikiEmpty" class="wiki-empty">
-            <div style="font-size:3rem;margin-bottom:14px">📚</div>
-            <div style="font-size:1rem;color:var(--text);margin-bottom:6px">마케팅 지식 위키</div>
-            <div style="font-size:0.78rem;color:var(--muted2);max-width:480px;margin:0 auto;line-height:1.7">
-              브랜드 · 경쟁사 · 페르소나 · 캠페인 · 트렌드를 markdown으로 누적합니다.<br>
-              <b style="color:var(--cyan)">콘텐츠 생성 시 자동으로 관련 페이지를 컨텍스트에 주입</b>해 시간이 갈수록 결과 품질이 복리로 올라갑니다.<br><br>
-              왼쪽에서 새 페이지를 만들거나 <b>📥 인제스트</b>로 텍스트·URL에서 시작하세요.
-            </div>
-          </div>
+          <div id="wikiEmpty" class="wiki-dashboard"></div>
 
           <div id="wikiEditor" style="display:none">
+            <div style="margin-bottom:10px">
+              <button class="wiki-back-btn" onclick="backToWikiDashboard()">← 대시보드로</button>
+            </div>
             <div class="wiki-toolbar">
               <input id="wikiTitle" class="inp" placeholder="페이지 제목 (예: 경쟁사 — 카카오)" style="font-size:1rem;font-weight:600">
               <select id="wikiCategory" class="sel" style="max-width:160px">
@@ -3550,6 +3619,11 @@ function renderWikiList() {
     });
   });
   document.getElementById('wikiCount').textContent = Object.keys(wiki.pages).length;
+  // 대시보드가 보이는 상태면 함께 갱신 (수정/추가/삭제 후 즉시 반영)
+  if (typeof renderWikiDashboard === 'function') {
+    const ed = document.getElementById('wikiEditor');
+    if (!ed || ed.style.display === 'none') renderWikiDashboard();
+  }
 }
 
 function newWikiPage(initial = {}) {
@@ -4323,6 +4397,258 @@ function confirmFileImport(proposals) {
 function updateWikiCtxInfo() {
   const el = document.getElementById('wikiCtxInfo');
   if (el) el.textContent = `(${Object.keys(wiki.pages).length}개 페이지 활성)`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   📊 위키 지식 대시보드 (Knowledge Dashboard)
+   참조 패턴: Obsidian Dashboard++, Outline, github-readme-stats
+   ═══════════════════════════════════════════════════════════ */
+
+const WIKI_CAT_ICONS = {
+  '브랜드': '🏷', '경쟁사': '⚔', '페르소나': '👤',
+  '캠페인': '🚀', '트렌드': '📈', '가이드': '📐', '기타': '📁',
+};
+const WIKI_CATS_ORDER = ['브랜드', '경쟁사', '페르소나', '캠페인', '트렌드', '가이드', '기타'];
+
+function relativeTime(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '방금';
+  if (m < 60) return `${m}분 전`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}시간 전`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}일 전`;
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `${mo}개월 전`;
+  return `${Math.floor(mo / 12)}년 전`;
+}
+
+function backToWikiDashboard() {
+  currentWikiPageId = null;
+  document.getElementById('wikiEditor').style.display = 'none';
+  document.getElementById('wikiEmpty').style.display = '';
+  renderWikiList();
+  renderWikiDashboard();
+}
+
+function filterWikiByCategory(cat) {
+  const inp = document.getElementById('wikiSearch');
+  inp.value = '';
+  renderWikiList();
+  const matches = Object.values(wiki.pages).filter(p => (p.category || '기타') === cat);
+  if (matches.length === 0) {
+    if (confirm(`"${cat}" 카테고리에 페이지가 없습니다. 새로 만드시겠습니까?`)) {
+      newWikiPage({ category: cat, title: `새 ${cat} 페이지` });
+    }
+  } else {
+    showToast(`📂 ${cat}: ${matches.length}개`);
+  }
+}
+
+function filterWikiByTag(tag) {
+  document.getElementById('wikiSearch').value = tag;
+  renderWikiList();
+  showToast(`🏷 #${tag}`);
+}
+
+function renderWikiDashboard() {
+  const dash = document.getElementById('wikiEmpty');
+  if (!dash) return;
+
+  const pages = Object.values(wiki.pages || {});
+  const total = pages.length;
+  const now = Date.now();
+  const week = 7 * 24 * 60 * 60 * 1000;
+
+  // === 통계 계산 ===
+  const recentlyEdited = pages.filter(p => (now - (p.updated || 0)) < week).length;
+  const catCounts = {};
+  WIKI_CATS_ORDER.forEach(c => catCounts[c] = 0);
+  pages.forEach(p => {
+    const c = WIKI_CATS_ORDER.includes(p.category) ? p.category : '기타';
+    catCounts[c]++;
+  });
+  const distinctCats = WIKI_CATS_ORDER.filter(c => catCounts[c] > 0).length;
+  const sources = new Set();
+  pages.forEach(p => { if (p.source) sources.add(p.source); });
+
+  // 카테고리 빈틈 진단
+  const gapSeverity = (count) => {
+    if (count === 0) return 'critical';
+    if (count > 0 && count < Math.max(2, total * 0.05)) return 'low';
+    return 'healthy';
+  };
+  const gapLabel = { critical: '보강 필요', low: '부족' };
+
+  // 최근 업데이트
+  const recent = pages.slice()
+    .sort((a, b) => (b.updated || b.created || 0) - (a.updated || a.created || 0))
+    .slice(0, 6);
+
+  // 태그 빈도
+  const tagFreq = {};
+  pages.forEach(p => (p.tags || []).forEach(t => {
+    if (t) tagFreq[t] = (tagFreq[t] || 0) + 1;
+  }));
+  const topTags = Object.entries(tagFreq).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  const maxTagFreq = topTags[0] ? topTags[0][1] : 1;
+
+  // 출처 빈도
+  const sourceFreq = {};
+  pages.forEach(p => { if (p.source) sourceFreq[p.source] = (sourceFreq[p.source] || 0) + 1; });
+  const topSources = Object.entries(sourceFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const sourcedPages = pages.filter(p => p.source).length;
+  const manualPages = total - sourcedPages;
+
+  // 14일 활동 히트맵
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    days.push({
+      start: d.getTime(),
+      end: d.getTime() + 24 * 60 * 60 * 1000,
+      count: 0,
+      label: d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+    });
+  }
+  pages.forEach(p => {
+    const u = p.updated || p.created || 0;
+    const day = days.find(d => u >= d.start && u < d.end);
+    if (day) day.count++;
+  });
+  const maxDayCount = Math.max(1, ...days.map(d => d.count));
+
+  // 카테고리 빈틈 (heathy 제외)
+  const gaps = WIKI_CATS_ORDER
+    .map(c => ({ cat: c, count: catCounts[c], severity: gapSeverity(catCounts[c]) }))
+    .filter(g => g.severity !== 'healthy');
+
+  // 인사말
+  const greeting = total === 0
+    ? '👋 환영합니다! 위키에 첫 페이지를 추가해 시작하세요. <b>왼쪽 + 새 페이지</b> 또는 <b>📂 파일 업로드</b>로 자료를 가져올 수 있어요.'
+    : `📚 현재 <b>${total}개 페이지</b> 보유 · 이번 주 <b>${recentlyEdited}개</b> 업데이트 · 출처 파일 <b>${sources.size}개</b>`;
+
+  // === HTML 렌더 ===
+  dash.innerHTML = `
+    <div class="wiki-dash-greeting">${greeting}</div>
+
+    <div class="wiki-dash-stats">
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-num">${total}</div>
+        <div class="wiki-stat-label">전체 페이지</div>
+      </div>
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-num">${recentlyEdited}</div>
+        <div class="wiki-stat-label">이번 주 활동</div>
+      </div>
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-num">${distinctCats}<small>/${WIKI_CATS_ORDER.length}</small></div>
+        <div class="wiki-stat-label">활성 카테고리</div>
+      </div>
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-num">${sources.size}</div>
+        <div class="wiki-stat-label">출처 파일</div>
+      </div>
+    </div>
+
+    <div class="wiki-section-title">🗂 카테고리 분포</div>
+    <div class="wiki-cat-grid">
+      ${WIKI_CATS_ORDER.map(c => {
+        const count = catCounts[c];
+        const sev = gapSeverity(count);
+        const pct = total > 0 ? Math.min(100, (count / Math.max(1, total)) * 100 * 1.6) : 0;
+        return `
+          <div class="wiki-cat-tile" onclick="filterWikiByCategory('${c}')">
+            <div class="wiki-cat-tile-head">
+              <span class="wiki-cat-tile-name">${WIKI_CAT_ICONS[c]} ${c}</span>
+              ${sev !== 'healthy' ? `<span class="wiki-gap-badge ${sev}">${gapLabel[sev]}</span>` : ''}
+            </div>
+            <div class="wiki-cat-tile-count">${count}</div>
+            <div class="wiki-cat-tile-bar"><div style="width:${pct}%"></div></div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <div class="wiki-dash-2col">
+      <div class="wiki-dash-card">
+        <div class="wiki-section-title" style="margin-top:0">⏱ 최근 업데이트</div>
+        ${recent.length === 0
+          ? '<div style="font-size:0.78rem;color:var(--muted2);padding:18px 0;text-align:center">아직 페이지가 없습니다</div>'
+          : recent.map(p => `
+              <div class="wiki-recent-item" onclick="openWikiPage('${p.id}')">
+                <div style="overflow:hidden;flex:1">
+                  <div class="wiki-recent-title">${esc(p.title || '제목 없음')}</div>
+                  <div class="wiki-recent-meta">${WIKI_CAT_ICONS[p.category] || '📁'} ${p.category || '기타'}${p.source ? ` · 출처 있음` : ''}</div>
+                </div>
+                <span class="wiki-recent-time">${relativeTime(p.updated || p.created)}</span>
+              </div>
+            `).join('')}
+      </div>
+      <div class="wiki-dash-card">
+        <div class="wiki-section-title" style="margin-top:0">⚠ 지식 공백</div>
+        ${gaps.length === 0
+          ? '<div style="font-size:0.78rem;color:var(--cyan);padding:18px 0;text-align:center">✓ 모든 카테고리 활성!</div>'
+          : gaps.map(g => `
+              <div class="wiki-recent-item" onclick="filterWikiByCategory('${g.cat}')">
+                <div style="overflow:hidden;flex:1">
+                  <div class="wiki-recent-title">${WIKI_CAT_ICONS[g.cat]} ${g.cat}</div>
+                  <div class="wiki-recent-meta">${g.count === 0 ? '비어있음 — 보강 필요' : `단 ${g.count}개 — 추가 권장`}</div>
+                </div>
+                <span class="wiki-gap-badge ${g.severity}">${gapLabel[g.severity]}</span>
+              </div>
+            `).join('')}
+      </div>
+    </div>
+
+    <div class="wiki-dash-2col">
+      <div class="wiki-dash-card">
+        <div class="wiki-section-title" style="margin-top:0">🏷 인기 태그</div>
+        ${topTags.length === 0
+          ? '<div style="font-size:0.78rem;color:var(--muted2);padding:18px 0;text-align:center">태그 없음 — 페이지에 태그를 추가해보세요</div>'
+          : `<div style="line-height:2.1">${topTags.map(([t, n]) => {
+              const size = 0.7 + (n / maxTagFreq) * 0.35;
+              return `<span class="wiki-tag-chip" style="font-size:${size.toFixed(2)}rem" onclick="filterWikiByTag('${esc(t)}')">${esc(t)}<small>${n}</small></span>`;
+            }).join('')}</div>`}
+      </div>
+      <div class="wiki-dash-card">
+        <div class="wiki-section-title" style="margin-top:0">📂 출처 인사이트</div>
+        <div style="display:flex;gap:14px;font-size:0.78rem;margin-bottom:10px">
+          <div><span style="color:var(--cyan);font-weight:700;font-size:1.1rem">${sourcedPages}</span> <span style="color:var(--muted2)">업로드</span></div>
+          <div><span style="color:var(--purple);font-weight:700;font-size:1.1rem">${manualPages}</span> <span style="color:var(--muted2)">수동 작성</span></div>
+        </div>
+        ${topSources.length === 0
+          ? '<div style="font-size:0.7rem;color:var(--muted2)">아직 업로드한 파일이 없습니다 — <b>📂 파일 업로드</b>로 시작하세요</div>'
+          : topSources.map(([s, n]) => `
+              <div class="wiki-source-row">
+                <span class="wiki-source-name" title="${esc(s)}">${esc((s.split('/').pop() || s).slice(0, 40))}</span>
+                <span style="color:var(--cyan)">${n}p</span>
+              </div>
+            `).join('')}
+      </div>
+    </div>
+
+    <div class="wiki-section-title">📅 최근 14일 활동</div>
+    <div class="wiki-heatmap">
+      ${days.map(d => {
+        const intensity = d.count === 0 ? 0.06 : 0.2 + (d.count / maxDayCount) * 0.8;
+        return `<div class="wiki-heatmap-cell" style="background:rgba(0,229,200,${intensity.toFixed(2)})" title="${d.label} · ${d.count}건"></div>`;
+      }).join('')}
+    </div>
+
+    <div class="wiki-section-title">⚡ 빠른 시작</div>
+    <div class="wiki-quick-actions">
+      <button class="tool-btn primary" onclick="newWikiPage()">+ 새 페이지</button>
+      <button class="tool-btn" onclick="document.getElementById('wikiFileUpload').click()">📂 파일 업로드</button>
+      <button class="tool-btn" onclick="openGoogleSheetsImport()">📊 Google Sheets</button>
+      <button class="tool-btn" onclick="openWikiIngest()">🤖 AI 인제스트</button>
+      <button class="tool-btn" onclick="openWikiQuery()">❓ AI 쿼리</button>
+    </div>
+  `;
 }
 
 /* Ctrl+S to save in wiki */
