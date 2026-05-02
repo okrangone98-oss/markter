@@ -3,6 +3,7 @@
 // (line 1718~ 의 toneMap, typeInstructions, system/user 합성 로직)
 
 import type { BuildPromptInput, ContentType, ToneStyle } from './types';
+import { HOOK_DESC_BY_NAME } from '@/lib/viral-hooks';
 
 /**
  * 톤 스타일 → 한국어 문체 지침 매핑 (v0.1 line 1719)
@@ -72,6 +73,16 @@ export function buildPrompt(input: BuildPromptInput): {
     contextPages,
   } = input;
 
+  // ── HOOK 태그 추출 (Studio 의 바이럴 훅 모달이 주제 앞에 [HOOK:이름] 삽입) ──
+  // 예: "[HOOK:역설형] 양양 귀촌 6년차 후기" → topicClean = "양양 귀촌 6년차 후기"
+  let topicClean = topic;
+  let hookName: string | null = null;
+  const hookMatch = topic.match(/^\[HOOK:([^\]]+)\]\s*/);
+  if (hookMatch) {
+    hookName = hookMatch[1];
+    topicClean = topic.replace(hookMatch[0], '');
+  }
+
   // ── system 프롬프트 합성 ──
   let system = `당신은 전문 콘텐츠 크리에이터입니다. ${
     TONE_MAP[tone] || '자연스러운'
@@ -97,10 +108,16 @@ export function buildPrompt(input: BuildPromptInput): {
     }
   }
 
+  // ── HOOK 적용 지침 (위 hookName 추출 결과 활용) ──
+  if (hookName) {
+    const desc = HOOK_DESC_BY_NAME[hookName] || '';
+    system += `\n\n[후킹 적용 지침]\n첫 1-2문장에 "${hookName}" 후킹 공식을 사용하세요.${desc ? ' ' + desc : ''}`;
+  }
+
   // ── user 프롬프트 합성 ──
   let user = `${
     TYPE_INSTRUCTIONS[type] || '다음 주제로 콘텐츠를 작성하세요.'
-  }\n\n주제: ${topic}`;
+  }\n\n주제: ${topicClean}`;
 
   if (keywords) {
     user += `\n핵심 키워드: ${keywords}`;
