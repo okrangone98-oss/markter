@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowAI — AI 콘텐츠 자동화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://js.puter.com/v2/"></script>
+<!-- ★ CDN 라이브러리 4종 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tiptap/core@2.4.0/dist/index.css">
+<script type="module">
+  import { Editor } from 'https://esm.sh/@tiptap/core@2.4.0';
+  import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.4.0';
+  window.__TipTapEditor = Editor;
+  window.__TipTapStarterKit = StarterKit;
+  window.dispatchEvent(new Event('tiptap-ready'));
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090c;
+  --s1:#0e1016;
+  --s2:#14161e;
+  --s3:#1c1f2a;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.1);
+  --text:#f0ede6;
+  --muted:#585c6e;
+  --muted2:#8a8e9e;
+  --cyan:#00e5c8;
+  --cyan-dim:rgba(0,229,200,0.1);
+  --cyan-border:rgba(0,229,200,0.2);
+  --amber:#f0a500;
+  --red:#ff6b6b;
+  --purple:#a78bfa;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;min-height:100vh;display:flex}
+
+/* ── 사이드바 ── */
+.sidebar{
+  width:240px;min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  transition:transform 0.3s;
+}
+.sidebar-logo{
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.logo-mark{
+  width:32px;height:32px;background:var(--cyan);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Unbounded',sans-serif;font-size:0.75rem;font-weight:700;color:#050a08;
+  flex-shrink:0;
+}
+.logo-text{font-family:'Unbounded',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:-0.02em}
+.logo-text span{color:var(--cyan)}
+
+.sidebar-section{padding:16px 12px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)}
+
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:8px;margin:1px 8px;
+  color:var(--muted2);font-size:0.85rem;cursor:pointer;
+  transition:all 0.15s;border:none;background:none;font-family:'DM Sans',sans-serif;
+  text-align:left;width:calc(100% - 16px);
+}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:var(--cyan-dim);color:var(--cyan);border:1px solid var(--cyan-border)}
+.nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;background:var(--cyan);color:#050a08;
+  font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:100px;
+}
+
+.sidebar-footer{
+  margin-top:auto;padding:16px;border-top:1px solid var(--border);
+}
+.api-status{
+  display:flex;align-items:center;gap:8px;font-size:0.78rem;
+  padding:10px 12px;background:var(--s2);border-radius:8px;
+  border:1px solid var(--border);cursor:pointer;transition:all 0.2s;
+}
+.api-status:hover{border-color:var(--cyan-border)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background 0.3s}
+.status-dot.connected{background:var(--cyan);box-shadow:0 0 6px rgba(0,229,200,0.5)}
+.status-text{color:var(--muted2)}
+
+/* ── 메인 ── */
+.main{margin-left:240px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── 탑바 ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(8,9,12,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{font-family:'Unbounded',sans-serif;font-size:0.85rem;font-weight:400;color:var(--muted2)}
+.topbar-title strong{color:var(--text);font-weight:700}
+
+.profile-bubble{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;color:#050a08;cursor:pointer;
+}
+
+/* ── 콘텐츠 영역 ── */
+.content{flex:1;padding:32px}
+
+/* ── API 키 모달 ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--s1);border:1px solid var(--border2);border-radius:20px;
+  padding:40px;width:100%;max-width:480px;
+  transform:translateY(20px);transition:transform 0.25s;
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:'Unbounded',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.modal-desc{font-size:0.875rem;color:var(--muted2);line-height:1.7;margin-bottom:24px}
+.modal-input{
+  width:100%;background:var(--s2);border:1px solid var(--border);
+  color:var(--text);padding:12px 16px;border-radius:10px;
+  font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color 0.2s;margin-bottom:8px;
+}
+.modal-input:focus{border-color:var(--cyan-border)}
+.modal-hint{font-size:0.75rem;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.modal-hint a{color:var(--cyan);text-decoration:none}
+.modal-btns{display:flex;gap:10px}
+.btn-cancel{
+  flex:1;background:none;border:1px solid var(--border);color:var(--muted2);
+  padding:11px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:0.875rem;transition:all 0.15s;
+}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text)}
+.btn-confirm{
+  flex:2;background:var(--cyan);border:none;color:#050a08;
+  padding:11px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:0.875rem;font-weight:600;transition:all 0.2s;
+}
+.btn-confirm:hover{background:#1fffd8;transform:translateY(-1px)}
+
+/* ── 워크스페이스 레이아웃 ── */
+.workspace{display:grid;grid-template-columns:1fr 1fr;gap:20px;height:calc(100vh - 130px)}
+
+/* ── 패널 공통 ── */
+.panel{
+  background:var(--s1);border:1px solid var(--border);border-radius:16px;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.panel-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--s2);flex-shrink:0;
+}
+.panel-title{font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2)}
+.panel-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+
+/* ── 입력 컴포넌트 ── */
+.field{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2);font-weight:500}
+
+.sel,.inp,.ta{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  padding:10px 14px;border-radius:8px;font-size:0.875rem;
+  font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;width:100%;
+}
+.sel:focus,.inp:focus,.ta:focus{border-color:var(--cyan-border);box-shadow:0 0 0 3px rgba(0,229,200,0.06)}
+.sel{cursor:pointer}
+.ta{resize:vertical;min-height:100px;line-height:1.6}
+.ta::placeholder,.inp::placeholder{color:var(--muted)}
+
+/* 프로필 칩 */
+.profile-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:5px 12px;border-radius:100px;font-size:0.75rem;
+  border:1px solid var(--border);color:var(--muted2);cursor:pointer;
+  transition:all 0.15s;background:none;font-family:'DM Sans',sans-serif;
+}
+.chip:hover{border-color:var(--cyan-border);color:var(--cyan)}
+.chip.active{background:var(--cyan-dim);border-color:var(--cyan-border);color:var(--cyan)}
+.chip-add{border-style:dashed;color:var(--muted)}
+
+/* 플랫폼 그리드 */
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.platform-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 10px;text-align:center;cursor:pointer;transition:all 0.15s;
+}
+.platform-card:hover{border-color:var(--cyan-border);background:var(--cyan-dim)}
+.platform-card.active{border-color:var(--cyan);background:var(--cyan-dim)}
+.platform-icon{font-size:1.4rem;margin-bottom:4px}
+.platform-name{font-size:0.7rem;color:var(--muted2)}
+.platform-card.active .platform-name{color:var(--cyan)}
+
+/* 실행 버튼 */
+.btn-run{
+  background:var(--cyan);color:#050a08;border:none;width:100%;
+  padding:13px;border-radius:10px;font-size:0.9rem;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all 0.25s;margin-top:auto;flex-shrink:0;
+}
+.btn-run:hover:not(:disabled){background:#1fffd8;transform:translateY(-1px);box-shadow:0 12px 32px rgba(0,229,200,0.25)}
+.btn-run:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+/* ── 출력 패널 ── */
+.output-toolbar{display:flex;align-items:center;gap:8px}
+.tool-btn{
+  background:none;border:1px solid var(--border);color:var(--muted2);
+  padding:5px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+  display:flex;align-items:center;gap:5px;
+}
+.tool-btn:hover{border-color:var(--border2);color:var(--text)}
+.tool-btn.primary{background:var(--cyan-dim);border-color:var(--cyan-border);color:var(--cyan)}
+
+.output-meta{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 20px;
+  border-bottom:1px solid var(--border);background:rgba(0,229,200,0.02);flex-shrink:0;
+}
+.meta-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:100px;font-size:0.7rem;font-weight:500;
+}
+.badge-waiting{background:var(--s3);color:var(--muted2)}
+.badge-running{background:rgba(240,165,0,0.12);color:var(--amber);border:1px solid rgba(240,165,0,0.2)}
+.badge-done{background:var(--cyan-dim);color:var(--cyan);border:1px solid var(--cyan-border)}
+.badge-err{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.2)}
+
+.output-area{
+  flex:1;overflow-y:auto;padding:20px;
+  font-size:0.875rem;line-height:1.8;color:var(--muted2);
+  white-space:pre-wrap;word-break:break-word;
+}
+.output-area.has-content{color:var(--text)}
+.output-placeholder{color:var(--muted);font-style:italic;font-size:0.875rem}
+
+.cursor{display:inline-block;width:2px;height:1.1em;background:var(--cyan);vertical-align:text-bottom;margin-left:1px;animation:cblink 0.7s infinite}
+@keyframes cblink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* 복사됨 피드백 */
+.output-footer{
+  padding:10px 20px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.char-count{font-size:0.72rem;color:var(--muted)}
+
+/* ── 히스토리 탭 ── */
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-item{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:14px;cursor:pointer;transition:all 0.15s;
+}
+.history-item:hover{border-color:var(--cyan-border);background:var(--cyan-dim)}
+.history-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.history-type{font-size:0.7rem;background:var(--s3);color:var(--muted2);padding:2px 8px;border-radius:4px}
+.history-time{font-size:0.7rem;color:var(--muted)}
+.history-preview{font-size:0.8rem;color:var(--muted2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* ── 탭 전환 ── */
+.tab-group{display:flex;gap:2px;background:var(--s2);padding:4px;border-radius:8px}
+.tab-btn{
+  flex:1;padding:7px 12px;border-radius:6px;font-size:0.78rem;font-weight:500;
+  border:none;background:none;color:var(--muted2);cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+}
+.tab-btn.active{background:var(--s1);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+
+/* ── 스피너 ── */
+.spinner{width:14px;height:14px;border:2px solid rgba(5,10,7,0.3);border-top-color:#050a08;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── 토스트 ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--s2);border:1px solid var(--cyan-border);
+  padding:12px 18px;border-radius:10px;font-size:0.825rem;
+  display:flex;align-items:center;gap:8px;
+  transform:translateY(60px);opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 12px 32px rgba(0,0,0,0.4);
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{color:var(--cyan)}
+
+/* ── 빈 히스토리 ── */
+.empty-state{
+  text-align:center;padding:40px 20px;color:var(--muted);
+  font-size:0.85rem;line-height:1.8;
+}
+.empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:0.4}
+
+/* ── 반응형 ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .workspace{grid-template-columns:1fr;height:auto}
+}
+
+/* ── 스크롤바 ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
+
+/* ── TipTap 에디터 ── */
+.tiptap-wrap{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.tiptap-toolbar{
+  display:flex;gap:4px;padding:8px 12px;
+  border-bottom:1px solid var(--border);background:var(--s3);flex-wrap:wrap;
+}
+.tiptap-btn{
+  background:none;border:1px solid transparent;color:var(--muted2);
+  padding:4px 8px;border-radius:5px;font-size:0.78rem;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+}
+.tiptap-btn:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.tiptap-btn.active{background:var(--cyan-dim);border-color:var(--cyan-border);color:var(--cyan)}
+.ProseMirror{
+  padding:16px;min-height:200px;outline:none;
+  font-size:0.9rem;line-height:1.8;color:var(--text);
+}
+.ProseMirror p{margin-bottom:8px}
+.ProseMirror h1,.ProseMirror h2,.ProseMirror h3{
+  font-family:'Unbounded',sans-serif;margin-bottom:10px;margin-top:16px;
+  letter-spacing:-0.02em;
+}
+.ProseMirror h1{font-size:1.4rem}
+.ProseMirror h2{font-size:1.15rem}
+.ProseMirror ul,.ProseMirror ol{padding-left:20px;margin-bottom:8px}
+.ProseMirror strong{color:var(--cyan)}
+.ProseMirror em{color:var(--muted2)}
+.ProseMirror blockquote{
+  border-left:3px solid var(--cyan);padding-left:14px;
+  color:var(--muted2);margin:8px 0;font-style:italic;
+}
+.ProseMirror code{
+  background:var(--s3);padding:2px 6px;border-radius:4px;
+  font-size:0.82rem;color:var(--amber);
+}
+.ProseMirror p.is-editor-empty:first-child::before{
+  content:attr(data-placeholder);color:var(--muted);pointer-events:none;float:left;height:0;
+}
+
+/* ── Marked.js 마크다운 렌더 ── */
+.markdown-body{font-size:0.9rem;line-height:1.8;color:var(--text)}
+.markdown-body h1,.markdown-body h2,.markdown-body h3{
+  font-family:'Unbounded',sans-serif;letter-spacing:-0.02em;
+  margin:16px 0 8px;color:var(--text);
+}
+.markdown-body h1{font-size:1.3rem;border-bottom:1px solid var(--border);padding-bottom:8px}
+.markdown-body h2{font-size:1.1rem;color:var(--cyan)}
+.markdown-body h3{font-size:0.95rem}
+.markdown-body p{margin-bottom:10px}
+.markdown-body ul,.markdown-body ol{padding-left:20px;margin-bottom:10px}
+.markdown-body li{margin-bottom:4px}
+.markdown-body strong{color:var(--cyan);font-weight:600}
+.markdown-body em{color:var(--muted2)}
+.markdown-body code{
+  background:var(--s3);padding:2px 6px;border-radius:4px;
+  font-size:0.82rem;color:var(--amber);
+}
+.markdown-body blockquote{
+  border-left:3px solid var(--cyan);padding-left:14px;
+  color:var(--muted2);margin:10px 0;font-style:italic;
+}
+.markdown-body hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ── 출력 모드 토글 ── */
+.view-toggle{display:flex;gap:4px;background:var(--s3);padding:3px;border-radius:7px}
+.view-btn{
+  padding:5px 12px;border-radius:5px;font-size:0.75rem;border:none;
+  background:none;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all 0.15s;
+}
+.view-btn.active{background:var(--s1);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+
+/* ── 카드뉴스 드래그 ── */
+.card-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-top:16px;
+}
+.card-item{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:16px;cursor:grab;transition:all 0.15s;position:relative;
+}
+.card-item:hover{border-color:var(--cyan-border);transform:translateY(-2px)}
+.card-item.sortable-ghost{opacity:0.3}
+.card-item.sortable-chosen{cursor:grabbing;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.card-num{
+  position:absolute;top:10px;right:10px;
+  background:var(--cyan);color:#050a08;
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;font-weight:700;
+}
+.card-head{font-size:0.82rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.card-body{font-size:0.75rem;color:var(--muted2);line-height:1.6}
+
+/* ── Chart.js 래퍼 ── */
+.chart-wrap{
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin-top:16px;
+}
+.chart-title{font-size:0.82rem;color:var(--muted2);margin-bottom:16px;font-weight:500}
+
+</style>
+</head>
+<body>
+
+<!-- ── 사이드바 ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">F</div>
+    <div class="logo-text">Flow<span>AI</span></div>
+  </div>
+
+  <div class="sidebar-section">콘텐츠</div>
+  <button class="nav-item active" onclick="switchPage('generate',this)">
+    <span class="nav-icon">✦</span> AI 생성
+    <span class="nav-badge">NEW</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('history',this)">
+    <span class="nav-icon">◷</span> 생성 히스토리
+  </button>
+
+  <div class="sidebar-section">도구</div>
+  <button class="nav-item" onclick="switchPage('blog',this)">
+    <span class="nav-icon">📝</span> 블로그 최적화
+  </button>
+  <button class="nav-item" onclick="switchPage('thread',this)">
+    <span class="nav-icon">🧵</span> 스레드/X
+  </button>
+  <button class="nav-item" onclick="switchPage('card',this)">
+    <span class="nav-icon">🃏</span> 카드뉴스 텍스트
+  </button>
+  <button class="nav-item" onclick="switchPage('detail',this)">
+    <span class="nav-icon">🛍</span> 상세페이지
+  </button>
+  <button class="nav-item" onclick="switchPage('script',this)">
+    <span class="nav-icon">🎬</span> 영상 대본
+  </button>
+  <button class="nav-item" onclick="switchPage('image',this)">
+    <span class="nav-icon">🖼</span> 이미지 생성
+    <span class="nav-badge">NEW</span>
+  </button>
+
+  <div class="sidebar-section">설정</div>
+  <button class="nav-item" onclick="openApiModal()">
+    <span class="nav-icon">🔑</span> API 키 설정
+  </button>
+
+  <div class="sidebar-footer">
+    <div class="api-status" onclick="openApiModal()">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">API 키 미설정</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ── 메인 ── -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle"><strong>AI 콘텐츠 생성</strong></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <!-- API 키 상태 버튼 -->
+      <button onclick="openApiModal()" id="topApiBtn" style="
+        display:flex;align-items:center;gap:8px;
+        background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);
+        color:#ff6b6b;padding:7px 14px;border-radius:8px;
+        font-size:0.78rem;font-weight:500;cursor:pointer;
+        font-family:'DM Sans',sans-serif;transition:all 0.2s;
+      ">
+        <span id="topApiDot" style="width:7px;height:7px;border-radius:50%;background:#ff6b6b;flex-shrink:0"></span>
+        <span id="topApiText">🔑 API 키 설정 필요</span>
+      </button>
+      <div class="profile-bubble">대훈</div>
+    </div>
+  </div>
+
+  <div class="content" id="pageContent">
+    <!-- 생성 워크스페이스 -->
+    <div id="page-generate" class="workspace">
+
+      <!-- 입력 패널 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">⚙ 설정</span>
+          <div class="tab-group">
+            <button class="tab-btn active" onclick="setInputTab(this,'basic')">기본</button>
+            <button class="tab-btn" onclick="setInputTab(this,'profile')">프로필</button>
+          </div>
+        </div>
+        <div class="panel-body" id="inputTabBasic">
+          <div class="field">
+            <label class="field-label">콘텐츠 유형</label>
+            <select class="sel" id="contentType" onchange="updatePlaceholder()">
+              <optgroup label="📝 글쓰기">
+                <option value="blog_intro">블로그 — 도입부 작성</option>
+                <option value="blog_full">블로그 — 전체 글 (SEO)</option>
+                <option value="email_cold">이메일 — 콜드 아웃리치</option>
+                <option value="email_newsletter">이메일 — 뉴스레터</option>
+                <option value="press_release">보도자료</option>
+              </optgroup>
+              <optgroup label="📱 SNS">
+                <option value="instagram_feed">인스타그램 — 피드 캡션</option>
+                <option value="instagram_story">인스타그램 — 스토리 문구</option>
+                <option value="thread_series">스레드 — 시리즈 (5부작)</option>
+                <option value="twitter_thread">X(트위터) — 스레드</option>
+                <option value="facebook_post">페이스북 포스트</option>
+              </optgroup>
+              <optgroup label="🛍 마케팅">
+                <option value="product_detail">상세페이지 — 상품 소개</option>
+                <option value="ad_copy">광고 카피 (3종 A/B)</option>
+                <option value="slogan">브랜드 슬로건 (5개)</option>
+                <option value="cta_variants">CTA 문구 변형 (5개)</option>
+              </optgroup>
+              <optgroup label="🎬 영상">
+                <option value="youtube_script">유튜브 대본 (인트로+본론+아웃트로)</option>
+                <option value="shorts_script">쇼츠/릴스 대본 (60초)</option>
+                <option value="tts_narration">TTS 나레이션 원고</option>
+                <option value="video_subtitle">영상 자막 텍스트</option>
+              </optgroup>
+              <optgroup label="📊 비즈니스">
+                <option value="proposal">기획서 — 개요</option>
+                <option value="report_summary">보고서 요약</option>
+                <option value="faq">FAQ 생성 (10개)</option>
+                <option value="meeting_minutes">회의록 정리</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label">주제 / 내용</label>
+            <textarea class="ta" id="userTopic" placeholder="예: 양양 귀촌 생활의 장점과 서핑 문화를 주제로..." rows="4"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="field-label">톤 & 스타일</label>
+            <select class="sel" id="toneStyle">
+              <option value="professional">전문적·신뢰감</option>
+              <option value="casual">친근·캐주얼</option>
+              <option value="emotional">감성·에세이</option>
+              <option value="witty">재치·유머</option>
+              <option value="urgent">긴급·행동 유도</option>
+              <option value="storytelling">스토리텔링</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label">대상 독자</label>
+            <input class="inp" id="targetAudience" placeholder="예: 30~40대 귀촌 관심 직장인">
+          </div>
+
+          <div class="field">
+            <label class="field-label">키워드 (쉼표 구분)</label>
+            <input class="inp" id="keywords" placeholder="예: 귀촌, 양양, 서핑, 느린 삶">
+          </div>
+        </div>
+
+        <!-- 프로필 탭 -->
+        <div class="panel-body" id="inputTabProfile" style="display:none">
+          <div class="field">
+            <label class="field-label">저장된 프로필</label>
+            <div class="profile-chips" id="profileChips">
+              <button class="chip active" onclick="loadProfile(this,'pakchaenam')">파책남</button>
+              <button class="chip" onclick="loadProfile(this,'center')">센터 공식</button>
+              <button class="chip" onclick="loadProfile(this,'business')">비즈니스</button>
+              <button class="chip chip-add" onclick="saveCurrentProfile()">+ 저장</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">문체 & 브랜드 지침</label>
+            <textarea class="ta" id="brandVoice" rows="5" placeholder="이 프로필의 문체, 자주 쓰는 표현, 피해야 할 단어 등을 입력하세요.&#10;&#10;예: 오호, 잠깐, 깜놀 같은 구어적 표현 사용. 장면에서 출발해 공감으로 착지. AI 냄새 제거 필수.">파책남(@slowbukbunri) 글쓰기 스타일:
+- 장면에서 출발 → 공감으로 착지
+- 구어적 자기 노출: "오호", "잠깐", "ㅎㅎ" 자연스럽게 사용
+- 감성·성찰·자연 중심 에세이 톤
+- AI 냄새 희석, 1인칭 경험 스토리텔링
+- 양양, 귀촌, 서핑, 로컬 커뮤니티 맥락</textarea>
+          </div>
+          <div class="field">
+            <label class="field-label">금지어 / 피해야 할 표현</label>
+            <input class="inp" id="avoidWords" placeholder="예: 혁신적인, 놀라운, ~드립니다, ~하세요">
+          </div>
+        </div>
+
+        <div style="padding:0 20px 20px;flex-shrink:0">
+          <button class="btn-run" id="runBtn" onclick="runGenerate()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            AI로 생성
+          </button>
+        </div>
+      </div>
+
+      <!-- 출력 패널 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">✦ 결과</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="view-toggle">
+              <button class="view-btn active" onclick="setViewMode('raw',this)">텍스트</button>
+              <button class="view-btn" onclick="setViewMode('markdown',this)">마크다운</button>
+              <button class="view-btn" onclick="setViewMode('editor',this)">에디터</button>
+            </div>
+            <div class="output-toolbar">
+              <button class="tool-btn" onclick="copyOutput()">📋 복사</button>
+              <button class="tool-btn" onclick="saveToHistory()">💾 저장</button>
+              <button class="tool-btn" onclick="clearOutput()">✕ 초기화</button>
+            </div>
+          </div>
+        </div>
+        <div class="output-meta">
+          <div class="meta-badge badge-waiting" id="outputBadge">⏸ 대기 중</div>
+          <div class="meta-badge" id="modelBadge" style="background:var(--s3);color:var(--muted2)">gemini-2.0-flash (free)</div>
+        </div>
+        <!-- 텍스트 뷰 (기본) -->
+        <div class="output-area" id="outputArea">
+          <div class="output-placeholder">← 왼쪽에서 유형과 내용을 설정하고<br>[AI로 생성] 버튼을 누르세요.<br><br>생성된 콘텐츠가 여기 실시간으로 출력됩니다.</div>
+        </div>
+        <!-- 마크다운 뷰 -->
+        <div id="markdownView" style="display:none;flex:1;overflow-y:auto;padding:20px">
+          <div class="markdown-body" id="markdownBody"></div>
+        </div>
+        <!-- TipTap 에디터 뷰 -->
+        <div id="editorView" style="display:none;flex:1;overflow-y:auto;padding:16px">
+          <div class="tiptap-wrap" style="height:100%">
+            <div class="tiptap-toolbar" id="tiptapToolbar">
+              <button class="tiptap-btn" onclick="tipCmd('bold')" title="굵게"><b>B</b></button>
+              <button class="tiptap-btn" onclick="tipCmd('italic')" title="기울임"><i>I</i></button>
+              <button class="tiptap-btn" onclick="tipCmd('h1')" title="제목1">H1</button>
+              <button class="tiptap-btn" onclick="tipCmd('h2')" title="제목2">H2</button>
+              <button class="tiptap-btn" onclick="tipCmd('h3')" title="제목3">H3</button>
+              <button class="tiptap-btn" onclick="tipCmd('bullet')" title="목록">• 목록</button>
+              <button class="tiptap-btn" onclick="tipCmd('ordered')" title="번호목록">1. 번호</button>
+              <button class="tiptap-btn" onclick="tipCmd('blockquote')" title="인용">❝ 인용</button>
+              <button class="tiptap-btn" onclick="tipCmd('code')" title="코드">&lt;/&gt;</button>
+              <button class="tiptap-btn" onclick="tipCmd('undo')">↩ 실행취소</button>
+              <button class="tiptap-btn" onclick="tipCmd('redo')">↪ 다시실행</button>
+              <button class="tiptap-btn" onclick="copyFromEditor()" style="margin-left:auto;color:var(--cyan)">📋 복사</button>
+            </div>
+            <div id="tiptapEditor"></div>
+          </div>
+        </div>
+        <div class="output-footer">
+          <span class="char-count" id="charCount">0자</span>
+          <span class="char-count" id="timeInfo"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 히스토리 페이지 -->
+    <div id="page-history" style="display:none">
+      <div style="max-width:900px;display:flex;flex-direction:column;gap:20px">
+        <!-- 통계 차트 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📊 생성 통계</span>
+            <span style="font-size:0.72rem;color:var(--muted2)" id="totalStatLabel"></span>
+          </div>
+          <div class="panel-body" style="flex-direction:row;gap:20px">
+            <div class="chart-wrap" style="flex:1">
+              <div class="chart-title">콘텐츠 유형별 생성 횟수</div>
+              <canvas id="typeChart" height="200"></canvas>
+            </div>
+            <div class="chart-wrap" style="flex:1">
+              <div class="chart-title">일별 생성량</div>
+              <canvas id="dateChart" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- 히스토리 목록 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">◷ 생성 히스토리</span>
+            <button class="tool-btn" onclick="clearHistory()">전체 삭제</button>
+          </div>
+          <div class="panel-body">
+            <div id="historyList" class="history-list">
+              <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                아직 생성된 콘텐츠가 없어요.<br>AI 생성 탭에서 먼저 콘텐츠를 만들어보세요.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 전문 도구 페이지들 -->
+    <div id="page-blog" style="display:none">
+      <div style="max-width:700px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📝 블로그 SEO 최적화</span></div>
+          <div class="panel-body">
+            <div class="field"><label class="field-label">메인 키워드</label><input class="inp" id="blog-keyword" placeholder="예: 양양 귀촌 후기"></div>
+            <div class="field"><label class="field-label">글 주제</label><textarea class="ta" id="blog-topic" placeholder="블로그 글 주제와 핵심 내용을 입력하세요..."></textarea></div>
+            <div class="field"><label class="field-label">글 길이</label>
+              <select class="sel" id="blog-length">
+                <option>짧게 (500~800자)</option>
+                <option selected>보통 (1,200~1,500자)</option>
+                <option>길게 (2,000자 이상)</option>
+              </select>
+            </div>
+            <button class="btn-run" onclick="runSpecial('blog')">블로그 글 생성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-thread" style="display:none">
+      <div style="max-width:700px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🧵 스레드/X 시리즈</span></div>
+          <div class="panel-body">
+            <div class="field"><label class="field-label">주제</label><textarea class="ta" id="thread-topic" placeholder="스레드로 풀고 싶은 주제나 이야기를 입력하세요..."></textarea></div>
+            <div class="field"><label class="field-label">편수</label>
+              <select class="sel" id="thread-count">
+                <option>3부작</option><option selected>5부작</option><option>7부작</option><option>10부작</option>
+              </select>
+            </div>
+            <button class="btn-run" onclick="runSpecial('thread')">스레드 생성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-card" style="display:none">
+      <div style="max-width:900px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🃏 카드뉴스 텍스트 + 순서 편집</span></div>
+          <div class="panel-body">
+            <div class="field"><label class="field-label">주제</label><textarea class="ta" id="card-topic" placeholder="카드뉴스로 만들 주제를 입력하세요..."></textarea></div>
+            <div class="field"><label class="field-label">카드 수</label>
+              <select class="sel" id="card-count">
+                <option>4장</option><option selected>6장</option><option>8장</option><option>10장</option>
+              </select>
+            </div>
+            <button class="btn-run" onclick="runSpecial('card')">카드뉴스 텍스트 생성</button>
+          </div>
+        </div>
+        <!-- 드래그앤드롭 카드 결과 -->
+        <div id="cardResult" style="display:none;margin-top:20px">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">🃏 카드 순서 편집 (드래그로 순서 변경)</span>
+              <div style="display:flex;gap:8px">
+                <button class="tool-btn" onclick="copyCardText()">📋 전체 복사</button>
+                <button class="tool-btn primary" onclick="exportCardText()">⬇ 텍스트 내보내기</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <p style="font-size:0.78rem;color:var(--muted2);margin-bottom:4px">💡 카드를 드래그해서 순서를 바꿀 수 있어요</p>
+              <div class="card-grid" id="cardGrid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-detail" style="display:none">
+      <div style="max-width:700px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🛍 상세페이지</span></div>
+          <div class="panel-body">
+            <div class="field"><label class="field-label">상품/서비스명</label><input class="inp" id="detail-product" placeholder="예: 양양 서핑 체험 패키지"></div>
+            <div class="field"><label class="field-label">특징 및 USP</label><textarea class="ta" id="detail-usp" placeholder="핵심 특징, 차별점, 타겟 고객을 입력하세요..."></textarea></div>
+            <button class="btn-run" onclick="runSpecial('detail')">상세페이지 생성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-script" style="display:none">
+      <div style="max-width:700px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🎬 영상 대본</span></div>
+          <div class="panel-body">
+            <div class="field"><label class="field-label">영상 유형</label>
+              <select class="sel" id="script-type">
+                <option>유튜브 (5~10분)</option>
+                <option>쇼츠/릴스 (60초)</option>
+                <option>TTS 나레이션</option>
+                <option>광고 영상 (30초)</option>
+              </select>
+            </div>
+            <div class="field"><label class="field-label">영상 주제</label><textarea class="ta" id="script-topic" placeholder="영상으로 만들 내용을 입력하세요..."></textarea></div>
+            <div class="field"><label class="field-label">씬 구성 포함</label>
+              <select class="sel" id="script-scene">
+                <option>텍스트만 (대본)</option>
+                <option selected>대본 + 씬 설명</option>
+                <option>대본 + 씬 + 자막 분리</option>
+              </select>
+            </div>
+            <button class="btn-run" onclick="runSpecial('script')">영상 대본 생성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+    <!-- 이미지 생성 페이지 -->
+    <div id="page-image" style="display:none">
+      <div style="max-width:900px">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🖼 AI 이미지 생성</span>
+            <span style="font-size:0.72rem;color:var(--muted2)">Powered by Puter.js · API 키 불필요 · 완전 무료</span>
+          </div>
+          <div class="panel-body" style="gap:20px">
+
+            <!-- 모델 선택 -->
+            <div class="field">
+              <label class="field-label">이미지 모델</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="imageModelGrid">
+                <div class="platform-card active" onclick="selectImgModel(this,'flux-schnell')" data-model="flux-schnell">
+                  <div class="platform-icon">⚡</div>
+                  <div class="platform-name">Flux Schnell</div>
+                  <div style="font-size:0.62rem;color:var(--muted);margin-top:2px">가장 빠름</div>
+                </div>
+                <div class="platform-card" onclick="selectImgModel(this,'dall-e-3')" data-model="dall-e-3">
+                  <div class="platform-icon">🎨</div>
+                  <div class="platform-name">DALL-E 3</div>
+                  <div style="font-size:0.62rem;color:var(--muted);margin-top:2px">고품질</div>
+                </div>
+                <div class="platform-card" onclick="selectImgModel(this,'stable-diffusion-xl-base-1.0')" data-model="stable-diffusion-xl-base-1.0">
+                  <div class="platform-icon">🌟</div>
+                  <div class="platform-name">SDXL</div>
+                  <div style="font-size:0.62rem;color:var(--muted);margin-top:2px">다목적</div>
+                </div>
+                <div class="platform-card" onclick="selectImgModel(this,'black-forest-labs/FLUX.1-kontext-pro')" data-model="black-forest-labs/FLUX.1-kontext-pro">
+                  <div class="platform-icon">✨</div>
+                  <div class="platform-name">Flux Kontext</div>
+                  <div style="font-size:0.62rem;color:var(--muted);margin-top:2px">최신·고급</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 유형 선택 -->
+            <div class="field">
+              <label class="field-label">이미지 용도</label>
+              <select class="sel" id="imageUsage" onchange="updateImgPromptHint()">
+                <option value="card">카드뉴스 배경 이미지</option>
+                <option value="thumbnail">유튜브 썸네일</option>
+                <option value="instagram">인스타그램 피드</option>
+                <option value="banner">웹 배너</option>
+                <option value="product">상품 이미지</option>
+                <option value="free">자유 생성</option>
+              </select>
+            </div>
+
+            <!-- 프롬프트 -->
+            <div class="field">
+              <label class="field-label">이미지 설명 (프롬프트)</label>
+              <textarea class="ta" id="imagePrompt" rows="3" placeholder="예: 양양 바닷가에서 서핑하는 사람, 골든아워, 감성적인 분위기, 고품질 사진"></textarea>
+              <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap" id="promptTags"></div>
+            </div>
+
+            <!-- 스타일 프리셋 -->
+            <div class="field">
+              <label class="field-label">스타일 프리셋</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="chip" onclick="addStyle('photorealistic, professional photography')">📷 사진</button>
+                <button class="chip" onclick="addStyle('flat design illustration, minimal')">🎨 일러스트</button>
+                <button class="chip" onclick="addStyle('cinematic, golden hour, warm tones')">🎬 시네마틱</button>
+                <button class="chip" onclick="addStyle('korean aesthetic, soft, pastel colors')">🌸 감성</button>
+                <button class="chip" onclick="addStyle('bold typography, graphic design')">✏️ 타이포</button>
+                <button class="chip" onclick="addStyle('3D render, clean background')">💎 3D</button>
+              </div>
+            </div>
+
+            <!-- 비율 -->
+            <div class="field">
+              <label class="field-label">이미지 비율</label>
+              <div style="display:flex;gap:8px">
+                <button class="chip active" id="ratio-1:1" onclick="selectRatio(this,'1:1')">■ 1:1 정방형</button>
+                <button class="chip" id="ratio-16:9" onclick="selectRatio(this,'16:9')">▬ 16:9 가로형</button>
+                <button class="chip" id="ratio-9:16" onclick="selectRatio(this,'9:16')">▮ 9:16 세로형</button>
+                <button class="chip" id="ratio-4:3" onclick="selectRatio(this,'4:3')">▭ 4:3</button>
+              </div>
+            </div>
+
+            <!-- 생성 수 -->
+            <div class="field">
+              <label class="field-label">생성 수</label>
+              <select class="sel" id="imageCount">
+                <option value="1">1장</option>
+                <option value="2" selected>2장</option>
+                <option value="4">4장</option>
+              </select>
+            </div>
+
+            <button class="btn-run" id="imgRunBtn" onclick="runImageGenerate()">
+              🖼 이미지 생성 (무료)
+            </button>
+          </div>
+        </div>
+
+        <!-- 결과 그리드 -->
+        <div id="imageResults" style="margin-top:20px;display:none">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">✦ 생성된 이미지</span>
+              <div style="display:flex;gap:8px">
+                <button class="tool-btn" onclick="downloadAllImages()">⬇ 전체 다운로드</button>
+                <button class="tool-btn" onclick="clearImages()">✕ 초기화</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div id="imageGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">🔑 OpenRouter API 키 설정</div>
+    <div class="modal-desc">OpenRouter에서 무료로 발급받은 API 키를 입력하세요. 신용카드 불필요. 키는 브라우저에만 저장됩니다.</div>
+    <input type="password" class="modal-input" id="apiKeyInput" placeholder="sk-or-v1-...">
+    <div class="modal-hint">
+      키 발급: <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a> → 구글/깃헙 가입 → Create Key<br>
+      무료 모델: gemini-2.0-flash-exp, llama-3.3-70b, deepseek-r1 등 11개 이상 제공
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeApiModal()">취소</button>
+      <button class="btn-confirm" onclick="saveApiKey()">저장하고 연결</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ── 상태 ──
+let apiKey = localStorage.getItem('openrouter_api_key') || '';
+let history = JSON.parse(localStorage.getItem('flowai_history') || '[]');
+let currentOutput = '';
+let currentPage = 'generate';
+
+// ── 초기화 ──
+window.onload = () => {
+  updateApiStatus();
+  if (apiKey) document.getElementById('apiKeyInput').value = apiKey;
+  // API 키 없으면 모달 자동 오픈
+  if (!apiKey) setTimeout(openApiModal, 600);
+};
+
+// ── API 상태 ──
+function updateApiStatus() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  const topBtn = document.getElementById('topApiBtn');
+  const topDot = document.getElementById('topApiDot');
+  const topTxt = document.getElementById('topApiText');
+
+  if (apiKey) {
+    // 사이드바
+    dot.classList.add('connected');
+    txt.textContent = 'OpenRouter 연결됨';
+    // 탑바 — 초록색 연결됨
+    topBtn.style.background = 'rgba(0,229,200,0.1)';
+    topBtn.style.borderColor = 'rgba(0,229,200,0.25)';
+    topBtn.style.color = 'var(--cyan)';
+    topDot.style.background = 'var(--cyan)';
+    topDot.style.boxShadow = '0 0 6px rgba(0,229,200,0.5)';
+    topTxt.textContent = '✓ API 연결됨';
+  } else {
+    dot.classList.remove('connected');
+    txt.textContent = 'API 키 미설정';
+    // 탑바 — 빨간색 미설정
+    topBtn.style.background = 'rgba(255,107,107,0.12)';
+    topBtn.style.borderColor = 'rgba(255,107,107,0.3)';
+    topBtn.style.color = '#ff6b6b';
+    topDot.style.background = '#ff6b6b';
+    topDot.style.boxShadow = 'none';
+    topTxt.textContent = '🔑 API 키 설정 필요';
+  }
+}
+
+// ── 모달 ──
+function openApiModal() {
+  document.getElementById('apiModal').classList.add('open');
+  setTimeout(() => document.getElementById('apiKeyInput').focus(), 300);
+}
+function closeApiModal() { document.getElementById('apiModal').classList.remove('open'); }
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { showToast('API 키를 입력해주세요'); return; }
+  apiKey = key;
+  localStorage.setItem('openrouter_api_key', key);
+  updateApiStatus();
+  closeApiModal();
+  showToast('✓ API 키가 저장되었습니다');
+}
+
+// ── 탭 전환 ──
+function setInputTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('inputTabBasic').style.display = tab === 'basic' ? 'flex' : 'none';
+  document.getElementById('inputTabProfile').style.display = tab === 'profile' ? 'flex' : 'none';
+}
+
+// ── 페이지 전환 ──
+function switchPage(page, btn) {
+  // 모든 페이지 숨기기
+  document.querySelectorAll('[id^="page-"]').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.style.display = page === 'generate' ? 'grid' : 'block';
+  if (btn) btn.classList.add('active');
+
+  currentPage = page;
+  const titles = {
+    generate: '<strong>AI 콘텐츠 생성</strong>',
+    history: '<strong>생성 히스토리</strong>',
+    blog: '<strong>블로그 SEO 최적화</strong>',
+    thread: '<strong>스레드/X 시리즈</strong>',
+    card: '<strong>카드뉴스 텍스트</strong>',
+    detail: '<strong>상세페이지 생성</strong>',
+    script: '<strong>영상 대본 생성</strong>',
+    image: '<strong>AI 이미지 생성</strong>',
+  };
+  document.getElementById('topbarTitle').innerHTML = titles[page] || '';
+
+  if (page === 'history') {
+    renderHistory();
+    setTimeout(renderCharts, 100);
+  }
+}
+
+// ── 플레이스홀더 업데이트 ──
+function updatePlaceholder() {
+  const type = document.getElementById('contentType').value;
+  const ph = {
+    blog_intro: '블로그 글의 주제를 입력하세요. 도입부 3~4문단을 작성합니다.',
+    blog_full: 'SEO 최적화 블로그 글 주제와 포함할 내용을 입력하세요.',
+    email_cold: '수신자 정보와 제안 내용을 입력하세요.',
+    instagram_feed: '인스타그램 피드에 올릴 사진/상황을 설명하세요.',
+    thread_series: '5부작 스레드로 풀어낼 주제를 입력하세요.',
+    youtube_script: '유튜브 영상의 주제와 핵심 내용을 입력하세요.',
+    shorts_script: '60초 쇼츠 영상 주제를 입력하세요.',
+    ad_copy: '광고할 상품/서비스와 핵심 USP를 입력하세요.',
+    product_detail: '상품명, 특징, 타겟 고객을 입력하세요.',
+  };
+  document.getElementById('userTopic').placeholder =
+    ph[type] || '주제와 핵심 내용을 자유롭게 입력하세요...';
+}
+
+// ── 프로필 로드 ──
+const profiles = {
+  pakchaenam: {
+    voice: `파책남(@slowbukbunri) 글쓰기 스타일:
+- 장면에서 출발 → 공감으로 착지
+- 구어적 자기 노출: "오호", "잠깐", "ㅎㅎ" 자연스럽게 사용
+- 감성·성찰·자연 중심 에세이 톤
+- AI 냄새 희석, 1인칭 경험 스토리텔링
+- 양양, 귀촌, 서핑, 로컬 커뮤니티 맥락`,
+    avoid: '혁신적인, 놀라운, 최고의, ~드립니다, 안녕하세요'
+  },
+  center: {
+    voice: `양양군 농촌활성화지원센터 공식 문체:
+- 공문서체: ~임, ~함, ~할 계획임
+- 신뢰감 있고 전문적인 톤
+- 지역 주민 역량강화, 공동체 활성화 중심`,
+    avoid: '구어체, 이모티콘, 캐주얼한 표현'
+  },
+  business: {
+    voice: `비즈니스 제안 문체:
+- 논리적·설득력 있는 구조
+- 데이터와 근거 중심
+- 액션 유도 CTA 포함`,
+    avoid: '감성적 표현, 불필요한 수식어'
+  }
+};
+function loadProfile(btn, key) {
+  document.querySelectorAll('.profile-chips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  if (profiles[key]) {
+    document.getElementById('brandVoice').value = profiles[key].voice;
+    document.getElementById('avoidWords').value = profiles[key].avoid;
+  }
+  showToast(`✓ ${btn.textContent} 프로필 로드됨`);
+}
+function saveCurrentProfile() {
+  const name = prompt('프로필 이름을 입력하세요:');
+  if (!name) return;
+  profiles[name] = {
+    voice: document.getElementById('brandVoice').value,
+    avoid: document.getElementById('avoidWords').value
+  };
+  const chips = document.getElementById('profileChips');
+  const addBtn = chips.querySelector('.chip-add');
+  const btn = document.createElement('button');
+  btn.className = 'chip';
+  btn.textContent = name;
+  btn.onclick = () => loadProfile(btn, name);
+  chips.insertBefore(btn, addBtn);
+  showToast(`✓ "${name}" 프로필 저장됨`);
+}
+
+// ── 프롬프트 빌더 ──
+function buildPrompt(type, topic, tone, audience, keywords, brandVoice, avoidWords) {
+  const toneMap = {
+    professional: '전문적이고 신뢰감 있는',
+    casual: '친근하고 캐주얼한',
+    emotional: '감성적이고 에세이 같은',
+    witty: '재치 있고 유머러스한',
+    urgent: '긴박감 있고 행동을 유도하는',
+    storytelling: '이야기 형식의 스토리텔링'
+  };
+
+  const typeInstructions = {
+    blog_intro: `블로그 글의 도입부(인트로)를 작성하세요. 독자를 끌어당기는 첫 문장으로 시작해 3~4문단으로 작성하세요.`,
+    blog_full: `SEO 최적화된 블로그 글 전체를 작성하세요. 제목, 소제목(H2), 본문, 마무리 구성으로 1,200~1,500자 내외로 작성하세요.`,
+    email_cold: `콜드 이메일을 작성하세요. 제목줄, 도입, 가치 제안, CTA 구조로 작성하세요.`,
+    email_newsletter: `뉴스레터 이메일을 작성하세요. 매력적인 제목, 본문, 구독자 행동 유도로 구성하세요.`,
+    instagram_feed: `인스타그램 피드 캡션을 작성하세요. 첫 줄 후킹, 본문, 해시태그 10개 포함해서 작성하세요.`,
+    instagram_story: `인스타그램 스토리용 짧고 강렬한 문구 5개를 작성하세요.`,
+    thread_series: `5부작 스레드를 작성하세요. 1편: 후킹/도입, 2~4편: 핵심 내용, 5편: 마무리+CTA 구조로 각 편을 [1/5] 형식으로 구분하세요.`,
+    twitter_thread: `X(트위터) 스레드를 작성하세요. 각 트윗은 280자 이내로, [1/n] 형식으로 구분하세요.`,
+    facebook_post: `페이스북 포스트를 작성하세요. 참여를 유도하는 질문이나 CTA를 포함하세요.`,
+    product_detail: `상세페이지 텍스트를 작성하세요. 헤드라인, 서브헤드, 특징 3가지, 고객 후기 예시, CTA 순서로 작성하세요.`,
+    ad_copy: `광고 카피 3가지 버전(A/B/C)을 작성하세요. 각각 헤드라인과 서브카피를 포함하세요.`,
+    slogan: `브랜드 슬로건 5개를 작성하세요. 짧고 기억에 남는 문구로 작성하세요.`,
+    cta_variants: `CTA(행동 유도) 문구 5가지 변형을 작성하세요. 강도와 톤이 다른 버전으로 작성하세요.`,
+    youtube_script: `유튜브 영상 대본을 작성하세요. [인트로 (30초)], [본론 1], [본론 2], [본론 3], [아웃트로 + CTA] 구조로 작성하세요.`,
+    shorts_script: `60초 쇼츠/릴스 대본을 작성하세요. 초 단위로 [0~5초: ...] 형식으로 씬을 구분하세요.`,
+    tts_narration: `TTS 나레이션 원고를 작성하세요. 읽기 편하고 자연스러운 구어체로 작성하세요.`,
+    video_subtitle: `영상 자막 텍스트를 작성하세요. 짧은 단위로 끊어서 자막에 적합한 형태로 작성하세요.`,
+    proposal: `기획서 개요를 작성하세요. 배경, 목적, 주요 내용, 기대효과, 일정 구조로 작성하세요.`,
+    report_summary: `보고서 요약을 작성하세요. 핵심 내용, 주요 수치, 결론, 권고사항 구조로 작성하세요.`,
+    faq: `FAQ 10개를 작성하세요. Q: A: 형식으로 실제 고객이 물을 만한 질문과 답변을 작성하세요.`,
+    meeting_minutes: `회의록을 정리하세요. 회의 목적, 주요 논의사항, 결정사항, 다음 액션 아이템 구조로 작성하세요.`,
+  };
+
+  let system = `당신은 전문 콘텐츠 크리에이터입니다. ${toneMap[tone] || '자연스러운'} 문체로 작성하세요.`;
+  if (audience) system += ` 대상 독자: ${audience}.`;
+  if (brandVoice && brandVoice.trim()) system += `\n\n[브랜드 문체 지침]\n${brandVoice}`;
+  if (avoidWords && avoidWords.trim()) system += `\n\n[금지 표현]: ${avoidWords} — 이 표현들은 절대 사용하지 마세요.`;
+  system += '\n\n마크다운 없이 깔끔한 텍스트로 작성하세요.';
+
+  let user = `${typeInstructions[type] || '다음 주제로 콘텐츠를 작성하세요.'}\n\n주제: ${topic}`;
+  if (keywords) user += `\n핵심 키워드: ${keywords}`;
+
+  return { system, user };
+}
+
+// ── 메인 생성 실행 ──
+async function runGenerate() {
+  if (!apiKey) { openApiModal(); return; }
+  const topic = document.getElementById('userTopic').value.trim();
+  if (!topic) { showToast('⚠ 주제를 입력해주세요'); return; }
+
+  const type = document.getElementById('contentType').value;
+  const tone = document.getElementById('toneStyle').value;
+  const audience = document.getElementById('targetAudience').value;
+  const keywords = document.getElementById('keywords').value;
+  const brandVoice = document.getElementById('brandVoice').value;
+  const avoidWords = document.getElementById('avoidWords').value;
+
+  const { system, user } = buildPrompt(type, topic, tone, audience, keywords, brandVoice, avoidWords);
+  await callGemini(system, user, type);
+}
+
+// ── 전문 도구 실행 ──
+async function runSpecial(toolType) {
+  if (!apiKey) { openApiModal(); return; }
+
+  let system = '', user = '';
+
+  if (toolType === 'blog') {
+    const keyword = document.getElementById('blog-keyword').value;
+    const topic = document.getElementById('blog-topic').value;
+    const length = document.getElementById('blog-length').value;
+    if (!topic) { showToast('⚠ 주제를 입력하세요'); return; }
+    system = 'SEO 전문가 블로거입니다. 검색 최적화된 블로그 글을 작성합니다. 마크다운 없이 작성하세요.';
+    user = `키워드: ${keyword}\n주제: ${topic}\n길이: ${length}\n\nSEO 최적화 블로그 글을 제목부터 본문까지 완성해주세요.`;
+  } else if (toolType === 'thread') {
+    const topic = document.getElementById('thread-topic').value;
+    const count = document.getElementById('thread-count').value;
+    if (!topic) { showToast('⚠ 주제를 입력하세요'); return; }
+    system = '스레드/X 콘텐츠 전문가입니다. 팔로워를 끌어당기는 시리즈 스레드를 작성합니다.';
+    user = `주제: ${topic}\n${count} 스레드를 [1/n] 형식으로 각 편을 구분해서 작성해주세요. 첫 편은 강력한 후킹으로 시작하세요.`;
+  } else if (toolType === 'card') {
+    const topic = document.getElementById('card-topic').value;
+    const count = document.getElementById('card-count').value;
+    if (!topic) { showToast('⚠ 주제를 입력하세요'); return; }
+    system = '카드뉴스 기획 전문가입니다. 각 카드의 텍스트를 간결하고 임팩트 있게 작성합니다.';
+    user = `주제: ${topic}\n${count}짜리 카드뉴스 텍스트를 [카드 1], [카드 2] 형식으로 작성해주세요. 각 카드는 제목(헤드라인)과 본문 2~3줄로 구성하세요.`;
+  } else if (toolType === 'detail') {
+    const product = document.getElementById('detail-product').value;
+    const usp = document.getElementById('detail-usp').value;
+    if (!product) { showToast('⚠ 상품명을 입력하세요'); return; }
+    system = '쇼핑몰 상세페이지 카피라이터입니다. 구매 전환율을 높이는 상세페이지 텍스트를 작성합니다.';
+    user = `상품: ${product}\n${usp ? '특징: ' + usp : ''}\n\n상세페이지 전체 텍스트를 작성해주세요. 메인 헤드라인, 서브 문구, 특징 3가지, 사용 후기 예시, 구매 CTA 순서로 구성하세요.`;
+  } else if (toolType === 'script') {
+    const type = document.getElementById('script-type').value;
+    const topic = document.getElementById('script-topic').value;
+    const scene = document.getElementById('script-scene').value;
+    if (!topic) { showToast('⚠ 주제를 입력하세요'); return; }
+    system = '유튜브/숏폼 영상 대본 전문 작가입니다. 시청자를 끝까지 붙잡는 대본을 작성합니다.';
+    user = `유형: ${type}\n주제: ${topic}\n구성: ${scene}\n\n영상 대본을 작성해주세요. 씬 구분과 화자 표시를 포함하세요.`;
+  }
+
+  await callGemini(system, user, toolType);
+  // 결과 보기 위해 생성 페이지로 이동하지 않고 현재 도구 페이지 유지
+}
+
+// ── OpenRouter API 호출 (스트리밍) ──
+async function callGemini(system, user, contentType) {
+  const btn = document.querySelectorAll('.btn-run');
+  btn.forEach(b => { b.disabled = true; b.innerHTML = '<div class="spinner"></div> 생성 중...'; });
+
+  setBadge('running', '⚡ 생성 중...');
+  const outputArea = document.getElementById('outputArea');
+  outputArea.innerHTML = '';
+  outputArea.classList.add('has-content');
+  currentOutput = '';
+  const startTime = Date.now();
+
+  if (currentPage !== 'generate') {
+    switchPage('generate', document.querySelector('.nav-item'));
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  // openrouter/free = 현재 사용 가능한 무료 모델 자동 선택 (가장 안정적)
+  const FREE_MODELS = [
+    'openrouter/free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'deepseek/deepseek-r1:free',
+    'google/gemma-3-27b-it:free',
+    'nvidia/llama-3.1-nemotron-70b-instruct:free'
+  ];
+
+  let lastError = '';
+  for (const model of FREE_MODELS) {
+    try {
+      const modelLabel = model === 'openrouter/free' ? 'auto (free)' : model.split('/')[1].split(':')[0];
+      document.getElementById('modelBadge').textContent = modelLabel;
+
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://flowai.app',
+          'X-Title': 'FlowAI'
+        },
+        body: JSON.stringify({
+          model: model,
+          stream: true,
+          max_tokens: 2048,
+          temperature: 0.8,
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: user }
+          ]
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        lastError = err.error?.message || `HTTP ${res.status}`;
+        // 429(한도초과) 또는 모델 접근 불가면 다음 모델 시도
+        if (res.status === 429 || res.status === 403) continue;
+        throw new Error(lastError);
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let gotContent = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (!data || data === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(data);
+            const text = parsed.choices?.[0]?.delta?.content || '';
+            if (text) {
+              gotContent = true;
+              currentOutput += text;
+              outputArea.innerHTML = esc(currentOutput) + '<span class="cursor"></span>';
+              outputArea.scrollTop = outputArea.scrollHeight;
+              document.getElementById('charCount').textContent = currentOutput.length + '자';
+            }
+          } catch(e) {}
+        }
+      }
+
+      if (!gotContent && !currentOutput) {
+        lastError = '응답이 비어있습니다';
+        continue;
+      }
+
+      // 성공
+      outputArea.innerHTML = esc(currentOutput);
+      setBadge('done', '✓ 완료');
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      document.getElementById('timeInfo').textContent = `${elapsed}초 · ${model === 'openrouter/free' ? 'auto-free' : model.split('/')[1].split(':')[0]}`;
+      // 뷰 모드 업데이트
+      updateAllViews(currentOutput);
+      // 카드뉴스면 드래그 그리드 렌더링
+      if (contentType === 'card') {
+        const cards = parseCardText(currentOutput);
+        if (cards.length) renderCardGrid(cards);
+      }
+      showToast('✓ 콘텐츠 생성 완료!');
+      break;
+
+    } catch(err) {
+      lastError = err.message;
+      // 마지막 모델도 실패하면 에러 표시
+      if (model === FREE_MODELS[FREE_MODELS.length - 1]) {
+        outputArea.innerHTML = `⚠ 오류: ${esc(lastError)}\n\n확인사항:\n• openrouter.ai/keys 에서 키를 새로 발급받으세요\n• 가입 후 이메일 인증이 필요할 수 있습니다`;
+        setBadge('err', '오류');
+        showToast('⚠ ' + lastError);
+      }
+    }
+  }
+
+  btn.forEach(b => {
+    b.disabled = false;
+    b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> AI로 생성';
+  });
+}
+
+// ── 출력 유틸 ──
+function esc(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function setBadge(type, text) {
+  const badge = document.getElementById('outputBadge');
+  badge.className = 'meta-badge badge-' + type;
+  badge.textContent = text;
+}
+function clearOutput() {
+  document.getElementById('outputArea').innerHTML = '<div class="output-placeholder">← 왼쪽에서 유형과 내용을 설정하고<br>[Gemini로 생성] 버튼을 누르세요.</div>';
+  document.getElementById('outputArea').classList.remove('has-content');
+  currentOutput = '';
+  setBadge('waiting', '⏸ 대기 중');
+  document.getElementById('charCount').textContent = '0자';
+  document.getElementById('timeInfo').textContent = '';
+}
+function copyOutput() {
+  if (!currentOutput) { showToast('⚠ 복사할 내용이 없습니다'); return; }
+  navigator.clipboard.writeText(currentOutput).then(() => showToast('📋 클립보드에 복사됨'));
+}
+
+// ── 히스토리 ──
+function saveToHistory() {
+  if (!currentOutput) { showToast('⚠ 저장할 내용이 없습니다'); return; }
+  const type = document.getElementById('contentType')?.value || '콘텐츠';
+  const item = {
+    id: Date.now(),
+    type,
+    preview: currentOutput.slice(0, 100),
+    full: currentOutput,
+    time: new Date().toLocaleString('ko-KR', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+  };
+  history.unshift(item);
+  if (history.length > 50) history.pop();
+  localStorage.setItem('flowai_history', JSON.stringify(history));
+  showToast('💾 히스토리에 저장됨');
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!history.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div>아직 생성된 콘텐츠가 없어요.<br>AI 생성 탭에서 먼저 콘텐츠를 만들어보세요.</div>';
+    return;
+  }
+  list.innerHTML = history.map(item => `
+    <div class="history-item" onclick="loadFromHistory(${item.id})">
+      <div class="history-meta">
+        <span class="history-type">${item.type}</span>
+        <span class="history-time">${item.time}</span>
+      </div>
+      <div class="history-preview">${esc(item.preview)}...</div>
+    </div>
+  `).join('');
+}
+
+function loadFromHistory(id) {
+  const item = history.find(h => h.id === id);
+  if (!item) return;
+  currentOutput = item.full;
+  switchPage('generate', document.querySelector('.nav-item'));
+  setTimeout(() => {
+    const area = document.getElementById('outputArea');
+    area.innerHTML = esc(item.full);
+    area.classList.add('has-content');
+    setBadge('done', '✓ 히스토리 로드');
+    document.getElementById('charCount').textContent = item.full.length + '자';
+  }, 100);
+}
+
+function clearHistory() {
+  if (!confirm('히스토리를 전부 삭제할까요?')) return;
+  history = [];
+  localStorage.removeItem('flowai_history');
+  renderHistory();
+  showToast('🗑 히스토리 삭제됨');
+}
+
+// ── 이미지 생성 ──
+let selectedImgModel = 'flux-schnell';
+let selectedRatio = '1:1';
+let generatedImages = [];
+
+function selectImgModel(el, model) {
+  document.querySelectorAll('#imageModelGrid .platform-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedImgModel = model;
+}
+
+function selectRatio(el, ratio) {
+  document.querySelectorAll('[id^="ratio-"]').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedRatio = ratio;
+}
+
+function addStyle(style) {
+  const ta = document.getElementById('imagePrompt');
+  const cur = ta.value.trim();
+  ta.value = cur ? cur + ', ' + style : style;
+}
+
+function updateImgPromptHint() {
+  const usage = document.getElementById('imageUsage').value;
+  const hints = {
+    card: '카드뉴스 배경, 텍스트 여백 충분히, 깔끔한 배경',
+    thumbnail: '유튜브 썸네일, 임팩트 있는 구도, 선명한 색상',
+    instagram: '인스타그램용, 정방형, 감성적인 분위기',
+    banner: '웹 배너, 가로형, 브랜드 컬러, 여백 충분',
+    product: '상품 사진, 흰 배경, 고품질, 전문적',
+    free: '자유롭게 입력하세요...',
+  };
+  document.getElementById('imagePrompt').placeholder = hints[usage] || '이미지 설명을 입력하세요...';
+}
+
+async function runImageGenerate() {
+  const prompt = document.getElementById('imagePrompt').value.trim();
+  if (!prompt) { showToast('⚠ 이미지 설명을 입력해주세요'); return; }
+
+  const count = parseInt(document.getElementById('imageCount').value);
+  const btn = document.getElementById('imgRunBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="border-color:rgba(5,10,7,0.3);border-top-color:#050a08"></div> 생성 중... (30초 내외)';
+
+  // 결과 영역 표시
+  document.getElementById('imageResults').style.display = 'block';
+  const grid = document.getElementById('imageGrid');
+  grid.innerHTML = '';
+
+  // 비율에 따른 크기
+  const sizeMap = {
+    '1:1': { width: 1024, height: 1024 },
+    '16:9': { width: 1792, height: 1024 },
+    '9:16': { width: 1024, height: 1792 },
+    '4:3': { width: 1024, height: 768 },
+  };
+  const size = sizeMap[selectedRatio] || sizeMap['1:1'];
+
+  // 플레이스홀더 카드 미리 추가
+  for (let i = 0; i < count; i++) {
+    const placeholder = document.createElement('div');
+    placeholder.id = `img-slot-${i}`;
+    placeholder.style.cssText = `
+      background:var(--s2);border:1px solid var(--border);border-radius:12px;
+      aspect-ratio:${size.width}/${size.height};
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;gap:8px;color:var(--muted);font-size:0.85rem;
+    `;
+    placeholder.innerHTML = `<div class="spinner" style="border-color:rgba(255,255,255,0.1);border-top-color:var(--cyan);width:24px;height:24px;border-width:3px"></div><span>생성 중...</span>`;
+    grid.appendChild(placeholder);
+  }
+
+  // 병렬 생성
+  const tasks = Array.from({length: count}, (_, i) =>
+    generateOneImage(prompt, selectedImgModel, size, i)
+  );
+
+  const results = await Promise.allSettled(tasks);
+  let successCount = 0;
+
+  results.forEach((result, i) => {
+    const slot = document.getElementById(`img-slot-${i}`);
+    if (result.status === 'fulfilled' && result.value) {
+      const imgEl = result.value;
+      slot.innerHTML = '';
+      slot.style.cssText = `position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--cyan-border);`;
+
+      imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      slot.appendChild(imgEl);
+
+      // 다운로드 버튼
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'tool-btn';
+      dlBtn.innerHTML = '⬇';
+      dlBtn.style.cssText = 'position:absolute;top:8px;right:8px;padding:4px 8px;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);';
+      dlBtn.onclick = () => downloadImage(imgEl.src, `flowai-image-${i+1}.png`);
+      slot.appendChild(dlBtn);
+
+      generatedImages.push(imgEl.src);
+      successCount++;
+    } else {
+      slot.innerHTML = `<span style="color:var(--red);font-size:0.78rem;text-align:center;padding:16px">생성 실패<br><small>${result.reason?.message || '다시 시도해보세요'}</small></span>`;
+    }
+  });
+
+  btn.disabled = false;
+  btn.innerHTML = '🖼 이미지 생성 (무료)';
+
+  if (successCount > 0) {
+    showToast(`✓ ${successCount}장 생성 완료!`);
+  } else {
+    showToast('⚠ 생성 실패 — 다른 모델로 시도해보세요');
+  }
+}
+
+async function generateOneImage(prompt, model, size, index) {
+  try {
+    // Puter.js로 이미지 생성
+    const imgEl = await puter.ai.txt2img(prompt, {
+      model: model,
+      width: size.width,
+      height: size.height,
+      testMode: false
+    });
+    return imgEl;
+  } catch(e) {
+    throw new Error(e.message || '생성 실패');
+  }
+}
+
+function downloadImage(src, filename) {
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = filename;
+  a.click();
+}
+
+function downloadAllImages() {
+  if (!generatedImages.length) { showToast('⚠ 다운로드할 이미지가 없습니다'); return; }
+  generatedImages.forEach((src, i) => downloadImage(src, `flowai-image-${i+1}.png`));
+  showToast(`⬇ ${generatedImages.length}장 다운로드 시작`);
+}
+
+function clearImages() {
+  document.getElementById('imageGrid').innerHTML = '';
+  document.getElementById('imageResults').style.display = 'none';
+  generatedImages = [];
+}
+
+// ── 뷰 모드 (텍스트/마크다운/에디터) ──
+let viewMode = 'raw';
+let tiptapEditor = null;
+let tiptapReady = false;
+
+window.addEventListener('tiptap-ready', () => { tiptapReady = true; });
+
+function setViewMode(mode, btn) {
+  viewMode = mode;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const raw = document.getElementById('outputArea');
+  const md = document.getElementById('markdownView');
+  const ed = document.getElementById('editorView');
+
+  raw.style.display = 'none';
+  md.style.display = 'none';
+  ed.style.display = 'none';
+
+  if (mode === 'raw') {
+    raw.style.display = 'flex';
+  } else if (mode === 'markdown') {
+    md.style.display = 'block';
+    if (currentOutput) {
+      document.getElementById('markdownBody').innerHTML = marked.parse(currentOutput);
+    } else {
+      document.getElementById('markdownBody').innerHTML = '<p style="color:var(--muted);font-style:italic">생성된 콘텐츠가 여기 마크다운으로 렌더링됩니다.</p>';
+    }
+  } else if (mode === 'editor') {
+    ed.style.display = 'flex';
+    initTipTap();
+  }
+}
+
+function initTipTap() {
+  if (!tiptapReady || !window.__TipTapEditor) {
+    setTimeout(initTipTap, 300);
+    return;
+  }
+  if (tiptapEditor) {
+    if (currentOutput) tiptapEditor.commands.setContent(currentOutput.replace(/\n/g, '<br>'));
+    return;
+  }
+  tiptapEditor = new window.__TipTapEditor({
+    element: document.getElementById('tiptapEditor'),
+    extensions: [window.__TipTapStarterKit],
+    content: currentOutput
+      ? '<p>' + currentOutput.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
+      : '<p>생성된 콘텐츠가 여기에 표시됩니다. 직접 편집할 수 있어요.</p>',
+  });
+}
+
+// 생성 완료 후 현재 뷰 모드에도 반영
+function updateAllViews(text) {
+  if (viewMode === 'markdown') {
+    document.getElementById('markdownBody').innerHTML = marked.parse(text);
+  } else if (viewMode === 'editor' && tiptapEditor) {
+    tiptapEditor.commands.setContent(
+      '<p>' + text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
+    );
+  }
+}
+
+function tipCmd(cmd) {
+  if (!tiptapEditor) return;
+  const chain = tiptapEditor.chain().focus();
+  const cmds = {
+    bold: () => chain.toggleBold().run(),
+    italic: () => chain.toggleItalic().run(),
+    h1: () => chain.toggleHeading({level:1}).run(),
+    h2: () => chain.toggleHeading({level:2}).run(),
+    h3: () => chain.toggleHeading({level:3}).run(),
+    bullet: () => chain.toggleBulletList().run(),
+    ordered: () => chain.toggleOrderedList().run(),
+    blockquote: () => chain.toggleBlockquote().run(),
+    code: () => chain.toggleCode().run(),
+    undo: () => chain.undo().run(),
+    redo: () => chain.redo().run(),
+  };
+  if (cmds[cmd]) cmds[cmd]();
+}
+
+function copyFromEditor() {
+  if (!tiptapEditor) return;
+  const text = tiptapEditor.getText();
+  navigator.clipboard.writeText(text).then(() => showToast('📋 에디터 내용 복사됨'));
+}
+
+// ── 카드뉴스 드래그앤드롭 ──
+let sortableInstance = null;
+
+function renderCardGrid(cards) {
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+
+  cards.forEach((card, i) => {
+    const el = document.createElement('div');
+    el.className = 'card-item';
+    el.dataset.index = i;
+    el.innerHTML = `
+      <div class="card-num">${i+1}</div>
+      <div class="card-head">${esc(card.title || `카드 ${i+1}`)}</div>
+      <div class="card-body">${esc(card.body || '')}</div>
+    `;
+    grid.appendChild(el);
+  });
+
+  document.getElementById('cardResult').style.display = 'block';
+
+  // Sortable 초기화
+  if (sortableInstance) sortableInstance.destroy();
+  sortableInstance = Sortable.create(grid, {
+    animation: 200,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    onEnd: () => {
+      // 번호 업데이트
+      grid.querySelectorAll('.card-item').forEach((el, i) => {
+        el.querySelector('.card-num').textContent = i + 1;
+      });
+      showToast('✓ 순서 변경됨');
+    }
+  });
+}
+
+function parseCardText(raw) {
+  // [카드 1] 형식으로 파싱
+  const blocks = raw.split(/\[카드\s*\d+\]/i).filter(b => b.trim());
+  return blocks.map(block => {
+    const lines = block.trim().split('\n').filter(l => l.trim());
+    return { title: lines[0] || '', body: lines.slice(1).join('\n') };
+  });
+}
+
+function copyCardText() {
+  const items = document.querySelectorAll('#cardGrid .card-item');
+  const text = Array.from(items).map((el, i) => {
+    const h = el.querySelector('.card-head').textContent;
+    const b = el.querySelector('.card-body').textContent;
+    return `[카드 ${i+1}]\n${h}\n${b}`;
+  }).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => showToast('📋 카드 텍스트 복사됨'));
+}
+
+function exportCardText() {
+  const items = document.querySelectorAll('#cardGrid .card-item');
+  const text = Array.from(items).map((el, i) => {
+    const h = el.querySelector('.card-head').textContent;
+    const b = el.querySelector('.card-body').textContent;
+    return `[카드 ${i+1}]\n${h}\n${b}`;
+  }).join('\n\n');
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cardnews.txt';
+  a.click();
+  showToast('⬇ 텍스트 파일 다운로드');
+}
+
+// ── Chart.js 통계 ──
+let typeChartInst = null;
+let dateChartInst = null;
+
+function renderCharts() {
+  if (!history.length) return;
+
+  // 유형별 집계
+  const typeCounts = {};
+  const dateCounts = {};
+
+  history.forEach(item => {
+    const t = item.type || '기타';
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+
+    const d = item.time?.split(' ')[0] || '기타';
+    dateCounts[d] = (dateCounts[d] || 0) + 1;
+  });
+
+  document.getElementById('totalStatLabel').textContent =
+    `총 ${history.length}개 생성됨`;
+
+  const cyan = 'rgba(0,229,200,0.8)';
+  const cyanDim = 'rgba(0,229,200,0.3)';
+  const colors = [
+    'rgba(0,229,200,0.8)','rgba(167,139,250,0.8)','rgba(248,113,113,0.8)',
+    'rgba(240,165,0,0.8)','rgba(56,189,248,0.8)','rgba(244,114,182,0.8)',
+  ];
+
+  const chartDefaults = {
+    plugins: { legend: { labels: { color:'#8a8e9e', font:{size:11} } } },
+    scales: {
+      x: { ticks:{color:'#585c6e'}, grid:{color:'rgba(255,255,255,0.04)'} },
+      y: { ticks:{color:'#585c6e'}, grid:{color:'rgba(255,255,255,0.04)'}, beginAtZero:true }
+    }
+  };
+
+  // 유형 차트
+  const typeCtx = document.getElementById('typeChart').getContext('2d');
+  if (typeChartInst) typeChartInst.destroy();
+  typeChartInst = new Chart(typeCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(typeCounts).map(k => k.length > 12 ? k.slice(0,12)+'…' : k),
+      datasets: [{
+        label: '생성 횟수',
+        data: Object.values(typeCounts),
+        backgroundColor: colors,
+        borderRadius: 6,
+      }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend:{display:false} } }
+  });
+
+  // 날짜 차트
+  const dateCtx = document.getElementById('dateChart').getContext('2d');
+  if (dateChartInst) dateChartInst.destroy();
+  const sortedDates = Object.keys(dateCounts).sort();
+  dateChartInst = new Chart(dateCtx, {
+    type: 'line',
+    data: {
+      labels: sortedDates,
+      datasets: [{
+        label: '생성 수',
+        data: sortedDates.map(d => dateCounts[d]),
+        borderColor: cyan,
+        backgroundColor: cyanDim,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: cyan,
+        pointRadius: 4,
+      }]
+    },
+    options: chartDefaults
+  });
+}
+
+// ── 토스트 ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
