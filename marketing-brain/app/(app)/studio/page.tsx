@@ -69,6 +69,18 @@ const PROFILE_LABELS: Record<string, string> = {
   custom: "⚙️ 직접 입력",
 };
 
+// 모델 선택 — 무료 폴백 체인 (model="") + BYOK 유료 모델
+// model="" 이면 서버가 FREE_MODELS 폴백 체인 사용 (무료 키만 필요)
+// 그 외는 OpenRouter 가 라우팅 — 사용자의 OpenRouter BYOK 키 필요
+const MODEL_OPTIONS: Array<{ id: string; label: string; tier: "free" | "paid" }> = [
+  { id: "", label: "🆓 무료 (Gemini Flash · Llama 3.3 폴백)", tier: "free" },
+  { id: "openai/gpt-5", label: "💎 GPT-5 (OpenAI)", tier: "paid" },
+  { id: "openai/gpt-5.5", label: "💎 GPT-5.5 (최신)", tier: "paid" },
+  { id: "anthropic/claude-sonnet-4.6", label: "💎 Claude Sonnet 4.6", tier: "paid" },
+  { id: "anthropic/claude-opus-5.7", label: "💎 Claude Opus 5.7 (최강)", tier: "paid" },
+  { id: "google/gemini-2.5-pro", label: "💎 Gemini 2.5 Pro", tier: "paid" },
+];
+
 export default function StudioPage() {
   const router = useRouter();
   const setPendingSlides = useTTSVideoStore((s) => s.setPendingSlides);
@@ -82,6 +94,7 @@ export default function StudioPage() {
   const [audience, setAudience] = useState("");
   const [customVoice, setCustomVoice] = useState("");
   const [customAvoid, setCustomAvoid] = useState("");
+  const [model, setModel] = useState<string>(""); // "" = 무료 폴백
 
   // ── 결과 상태 ──
   const [result, setResult] = useState("");
@@ -113,7 +126,7 @@ export default function StudioPage() {
       await streamGenerate(
         { type, topic: topic.trim(), tone, audience, keywords, brandVoice, avoidWords },
         (chunk) => setResult((prev) => prev + chunk),
-        { signal: abortRef.current.signal }
+        { signal: abortRef.current.signal, model: model || undefined }
       );
     } catch (e) {
       if ((e as Error).name !== "AbortError") {
@@ -186,6 +199,26 @@ export default function StudioPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
         {/* 좌측: 입력 폼 */}
         <div className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/40 p-5">
+          <div className="space-y-1.5">
+            <Label>모델</Label>
+            <Tooltip content="유료 모델은 설정 → API 키에서 OpenRouter 키 등록 필요. 무료는 항상 작동.">
+              <select
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+              >
+                {MODEL_OPTIONS.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </select>
+            </Tooltip>
+            {model && (
+              <p className="text-[10px] text-amber-300/70">
+                💡 BYOK OpenRouter 키 필요 — <a href="/settings/api-keys" className="underline hover:text-amber-200">설정</a>
+              </p>
+            )}
+          </div>
+
           <div className="space-y-1.5">
             <Label>브랜드 프로필</Label>
             <select

@@ -5,6 +5,7 @@
 import { NextRequest } from 'next/server';
 import { buildPrompt } from '@/lib/llm/prompts';
 import { callOpenRouter, streamOpenRouter } from '@/lib/llm/openrouter';
+import { getServerApiKey } from '@/lib/server/api-keys';
 import type {
   BuildPromptInput,
   ContentType,
@@ -17,6 +18,9 @@ export const runtime = 'nodejs';
 interface GenerateRequestBody {
   input: BuildPromptInput;
   stream?: boolean;
+  // BYOK: 사용자가 명시적으로 OpenRouter 모델 ID 지정 (예: "openai/gpt-5", "anthropic/claude-opus-5.7")
+  // 미지정 시 무료 모델 폴백 체인 (FREE_MODELS) 사용.
+  model?: string;
 }
 
 /**
@@ -27,6 +31,7 @@ function validateInput(body: unknown): {
   ok: true;
   input: BuildPromptInput;
   stream: boolean;
+  model?: string;
 } | { ok: false; error: string } {
   if (!body || typeof body !== 'object') {
     return { ok: false, error: '요청 본문이 비어있습니다.' };
@@ -64,15 +69,16 @@ function validateInput(body: unknown): {
     ok: true,
     input: normalized,
     stream: Boolean(b.stream),
+    model: typeof b.model === 'string' && b.model.trim() ? b.model.trim() : undefined,
   };
 }
 
 export async function POST(req: NextRequest) {
-  // ── 환경 변수 가드 ──
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  // ── BYOK 우선, 환경변수 폴백 ──
+  const { key: apiKey } = await getServerApiKey('openrouter');
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: 'OPENROUTER_API_KEY 환경변수가 설정되지 않았습니다.' }),
+      JSON.stringify({ error: 'OpenRouter 키가 없습니다. 설정 → API 키에서 등록하세요.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
     );
   }
@@ -96,7 +102,7 @@ export async function POST(req: NextRequest) {
       { status: 400, headers: { 'Content-Type': 'application/json' } },
     );
   }
-  const { input, stream } = v;
+  const { input, stream, model } = v;
 
   // ── 프롬프트 합성 ──
   const { system, user } = buildPrompt(input);
@@ -112,7 +118,7 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           for await (const delta of streamOpenRouter(
-            { messages, stream: true },
+            { messages, stream: true, model },
             apiKey,
           )) {
             const payload = `data: ${JSON.stringify({ delta })}\n\n`;
@@ -142,7 +148,7 @@ export async function POST(req: NextRequest) {
 
   // ── 비스트리밍 분기 ──
   try {
-    const content = await callOpenRouter({ messages }, apiKey);
+    const content = await callOpenRouter({ messages, model }, apiKey);
     return new Response(
       JSON.stringify({ content }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },

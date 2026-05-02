@@ -13,6 +13,7 @@ import {
   WandSparkles,
   Mic2,
   Film,
+  Wand2,
   Sparkles,
   Brain,
   ExternalLink,
@@ -57,6 +58,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/studio", label: "콘텐츠 스튜디오", icon: WandSparkles },
       { href: "/tts", label: "AI 음성 (TTS)", icon: Mic2 },
       { href: "/video", label: "영상 메이커", icon: Film },
+      { href: "/remake", label: "영상 리메이커", icon: Wand2 },
     ],
   },
   {

@@ -27,16 +27,17 @@ export async function generate(input: BuildPromptInput): Promise<string> {
 /**
  * 스트리밍 호출 — onDelta 콜백으로 매 청크를 흘려보내고, 종료 후 누적 텍스트를 반환.
  * AbortController.signal 을 옵션으로 받습니다.
+ * model 옵션: 명시하면 해당 OpenRouter 모델 ID 사용 (BYOK 키 필요), 미지정 시 무료 폴백 체인.
  */
 export async function streamGenerate(
   input: BuildPromptInput,
   onDelta: (chunk: string) => void,
-  options?: { signal?: AbortSignal },
+  options?: { signal?: AbortSignal; model?: string },
 ): Promise<string> {
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input, stream: true }),
+    body: JSON.stringify({ input, stream: true, model: options?.model }),
     signal: options?.signal,
   });
 
