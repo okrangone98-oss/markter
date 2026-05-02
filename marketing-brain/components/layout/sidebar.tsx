@@ -13,9 +13,11 @@ import {
   WandSparkles,
   Mic2,
   Film,
+  Wand2,
   Sparkles,
   Brain,
   ExternalLink,
+  Key,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -56,6 +58,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/studio", label: "콘텐츠 스튜디오", icon: WandSparkles },
       { href: "/tts", label: "AI 음성 (TTS)", icon: Mic2 },
       { href: "/video", label: "영상 메이커", icon: Film },
+      { href: "/remake", label: "영상 리메이커", icon: Wand2 },
     ],
   },
   {
@@ -64,7 +67,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: "도구함",
-    items: [{ href: "/links", label: "링크 모음", icon: ExternalLink }],
+    items: [
+      { href: "/links", label: "링크 모음", icon: ExternalLink },
+      { href: "/settings/api-keys", label: "API 키 (BYOK)", icon: Key },
+    ],
   },
 ];
 
