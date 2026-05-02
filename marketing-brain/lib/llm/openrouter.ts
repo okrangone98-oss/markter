@@ -12,6 +12,7 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
  */
 export const FREE_MODELS: string[] = [
   'google/gemini-2.0-flash-exp:free',
+  'tencent/hy3-preview:free',
   'meta-llama/llama-3.3-70b-instruct:free',
   'openrouter/free',
   'deepseek/deepseek-r1:free',

@@ -76,6 +76,7 @@ const PROFILE_LABELS: Record<string, string> = {
 // 그 외는 OpenRouter 가 라우팅 — 사용자의 OpenRouter BYOK 키 필요
 const MODEL_OPTIONS: Array<{ id: string; label: string; tier: "free" | "paid" }> = [
   { id: "", label: "🆓 무료 (Gemini Flash · Llama 3.3 폴백)", tier: "free" },
+  { id: "tencent/hy3-preview:free", label: "🆓 Tencent Hy3 (295B MoE · 무료)", tier: "free" },
   { id: "openai/gpt-5", label: "💎 GPT-5 (OpenAI)", tier: "paid" },
   { id: "openai/gpt-5.5", label: "💎 GPT-5.5 (최신)", tier: "paid" },
   { id: "anthropic/claude-sonnet-4.6", label: "💎 Claude Sonnet 4.6", tier: "paid" },
