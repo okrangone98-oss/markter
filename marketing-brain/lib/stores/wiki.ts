@@ -19,6 +19,7 @@ interface WikiStore {
   fetchPages: () => Promise<void>;
   selectPage: (id: string | null) => void;
   createPage: (input?: Partial<WikiPageCreateInput>) => Promise<WikiPage | null>;
+  bulkCreatePages: (inputs: WikiPageCreateInput[]) => Promise<{ created: number; failed: number }>;
   updatePage: (id: string, patch: WikiPageUpdateInput) => Promise<WikiPage | null>;
   deletePage: (id: string) => Promise<boolean>;
   setSearch: (q: string) => void;
@@ -84,6 +85,34 @@ export const useWikiStore = create<WikiStore>((set, get) => ({
       set({ error: (e as Error).message, loading: false });
       return null;
     }
+  },
+
+  async bulkCreatePages(inputs) {
+    let created = 0;
+    let failed = 0;
+    const newPages: WikiPage[] = [];
+    for (const input of inputs) {
+      try {
+        const { page } = await api<{ page: WikiPage }>("/api/wiki", {
+          method: "POST",
+          body: JSON.stringify({
+            title: input.title,
+            content: input.content,
+            category: normalizeCategory(input.category),
+            tags: input.tags ?? [],
+            source: input.source ?? null,
+          }),
+        });
+        newPages.push(page);
+        created++;
+      } catch {
+        failed++;
+      }
+    }
+    if (newPages.length > 0) {
+      set((s) => ({ pages: [...newPages, ...s.pages] }));
+    }
+    return { created, failed };
   },
 
   async updatePage(id, patch) {

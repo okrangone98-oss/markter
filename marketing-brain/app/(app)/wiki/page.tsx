@@ -17,12 +17,14 @@ import { renderWikiMarkdown, findBacklinks } from "@/lib/wiki/markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { UploadDialog } from "@/components/wiki/upload-dialog";
 
 /* ══════════════════════════════════════════════════════════
    메인 페이지
    ══════════════════════════════════════════════════════════ */
 export default function WikiPage() {
   const { pages, currentPageId, fetchPages, loading, error } = useWikiStore();
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   useEffect(() => { fetchPages(); }, [fetchPages]);
 
@@ -30,7 +32,7 @@ export default function WikiPage() {
 
   return (
     <div className="flex h-[calc(100vh-7rem)] gap-4">
-      <WikiSidebar />
+      <WikiSidebar onUploadClick={() => setUploadOpen(true)} />
       <main className="flex-1 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40 p-6">
         {loading && pages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-slate-500">
@@ -42,9 +44,11 @@ export default function WikiPage() {
         ) : currentPage ? (
           <WikiEditor page={currentPage} allPages={pages} />
         ) : (
-          <WikiDashboard pages={pages} />
+          <WikiDashboard pages={pages} onUploadClick={() => setUploadOpen(true)} />
         )}
       </main>
+
+      <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </div>
   );
 }
@@ -52,7 +56,7 @@ export default function WikiPage() {
 /* ══════════════════════════════════════════════════════════
    사이드바
    ══════════════════════════════════════════════════════════ */
-function WikiSidebar() {
+function WikiSidebar({ onUploadClick }: { onUploadClick: () => void }) {
   const { pages, currentPageId, search, setSearch, selectPage, createPage } = useWikiStore();
 
   const filtered = useMemo(() => {
@@ -145,10 +149,13 @@ function WikiSidebar() {
 
       <div className="border-t border-slate-800 pt-3 space-y-1">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
-          📂 파일 업로드 (준비 중)
+          📂 파일 업로드
         </div>
-        <button className="w-full flex items-center gap-1.5 rounded px-2 py-1.5 text-left text-xs text-slate-500 hover:bg-slate-800/40" disabled>
-          <Upload className="h-3 w-3" /> Excel · PDF · CSV
+        <button
+          onClick={onUploadClick}
+          className="w-full flex items-center gap-1.5 rounded px-2 py-1.5 text-left text-xs text-slate-300 hover:bg-slate-800/60 hover:text-[var(--color-primary)] transition-colors"
+        >
+          <Upload className="h-3 w-3" /> Excel · PDF · CSV · Sheets
         </button>
       </div>
     </aside>
@@ -158,7 +165,7 @@ function WikiSidebar() {
 /* ══════════════════════════════════════════════════════════
    대시보드 (v0.1 패턴 포팅 — Obsidian/Outline 스타일)
    ══════════════════════════════════════════════════════════ */
-function WikiDashboard({ pages }: { pages: WikiPage[] }) {
+function WikiDashboard({ pages, onUploadClick }: { pages: WikiPage[]; onUploadClick: () => void }) {
   const { createPage, selectPage, filterByCategory, filterByTag } = useWikiStore();
 
   const total = pages.length;
@@ -404,8 +411,8 @@ function WikiDashboard({ pages }: { pages: WikiPage[] }) {
         <Button onClick={() => createPage()} size="sm">
           <Plus className="h-3.5 w-3.5" /> 새 페이지
         </Button>
-        <Button variant="secondary" size="sm" disabled>
-          📂 파일 업로드 (준비 중)
+        <Button variant="secondary" size="sm" onClick={onUploadClick}>
+          📂 Excel · PDF · CSV 업로드
         </Button>
         <Button variant="secondary" size="sm" disabled>
           🤖 AI 인제스트 (준비 중)
