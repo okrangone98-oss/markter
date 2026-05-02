@@ -4165,11 +4165,12 @@ async function parseTextFile(file, category = '기타') {
 function openGoogleSheetsImport() {
   openWikiModal(
     '📊 Google Sheets URL 가져오기',
-    '공개로 설정된 구글 스프레드시트 URL을 붙여넣으면 CSV로 가져와 위키 페이지를 만듭니다. 권한이 "링크가 있는 모든 사용자: 뷰어" 이상이어야 합니다.',
+    '구글 스프레드시트 URL을 붙여넣으면 CSV로 가져와 위키 페이지를 만듭니다. 여러 엔드포인트(export · gviz · pub)를 자동 시도합니다.',
     `<input class="inp" id="gsheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../edit#gid=0">
      <div style="font-size:0.72rem;color:var(--muted2);margin-top:8px;line-height:1.7">
-       💡 <b>팁</b>: gid가 있으면 해당 시트만, 없으면 첫 시트만 가져옵니다.<br>
-       💡 시트가 비공개라면 파일 → 다운로드 → <b>Excel(.xlsx)</b>로 저장 후 위 <b>📂 Excel · PDF · CSV 업로드</b>를 사용하세요.
+       💡 <b>가장 확실한 방법</b>: 시트에서 <b>파일 → 공유 → 웹에 게시(Publish to web)</b> → CSV 형식 → 게시 → URL 붙여넣기<br>
+       💡 <b>또는</b>: 공유 → "링크가 있는 모든 사용자: 뷰어" + 워크스페이스 외부 공유 허용<br>
+       💡 <b>가장 간단</b>: 시트에서 <b>파일 → 다운로드 → Excel(.xlsx)</b> 후 위 <b>📂 Excel 업로드</b> 사용 (100% 동작)
      </div>`,
     '🔄 가져오기',
     runGoogleSheetsImport
@@ -4179,34 +4180,77 @@ function openGoogleSheetsImport() {
 async function runGoogleSheetsImport() {
   const url = (document.getElementById('gsheetUrl').value || '').trim();
   if (!url) { showToast('⚠ URL을 입력하세요'); return; }
-  const m = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-  if (!m) { showToast('⚠ 구글 스프레드시트 URL이 아닙니다'); return; }
-  const sheetId = m[1];
+
+  // 1) /pub URL (이미 게시된 시트)
+  const pubMatch = url.match(/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)/);
+  // 2) 일반 /d/{id}/ URL
+  const stdMatch = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (!pubMatch && !stdMatch) { showToast('⚠ 구글 스프레드시트 URL이 아닙니다'); return; }
+
   const gidM = url.match(/[#&?]gid=(\d+)/);
   const gid = gidM ? gidM[1] : '0';
-  const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
+  // 시도할 엔드포인트 목록 (순서대로 시도)
+  const endpoints = [];
+  if (pubMatch) {
+    // 이미 "웹에 게시"된 시트 — 가장 확실
+    const pubId = pubMatch[1];
+    endpoints.push({
+      name: '게시된 CSV',
+      url: `https://docs.google.com/spreadsheets/d/e/${pubId}/pub?output=csv${gidM ? `&gid=${gid}` : ''}`,
+    });
+  }
+  if (stdMatch) {
+    const sheetId = stdMatch[1];
+    endpoints.push(
+      { name: 'export', url: `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}` },
+      { name: 'gviz', url: `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}` },
+      { name: 'gviz-default', url: `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv` },
+    );
+  }
 
   const btn = document.getElementById('wikiModalAction');
   btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> 가져오는 중...';
-  try {
-    const resp = await fetch(exportUrl);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status} — 시트가 공개 상태인지 확인하세요`);
-    const csv = await resp.text();
-    if (!csv.trim() || csv.includes('<!DOCTYPE html>')) {
-      throw new Error('공개 권한이 없습니다 — "링크가 있는 모든 사용자: 뷰어" 이상으로 설정하세요');
+
+  let lastErr = '';
+  let success = false;
+
+  for (const ep of endpoints) {
+    try {
+      const resp = await fetch(ep.url, { redirect: 'follow' });
+      if (!resp.ok) { lastErr = `${ep.name}: HTTP ${resp.status}`; continue; }
+      const text = await resp.text();
+      // HTML 응답이면 권한 없음 (로그인 페이지 리다이렉트)
+      if (!text.trim() || /<!DOCTYPE html>|<html/i.test(text.slice(0, 200))) {
+        lastErr = `${ep.name}: 인증 페이지 응답 (공개 아님)`;
+        continue;
+      }
+      // gviz 형식이면 ")]}'\n" 프리픽스 제거 + JSONP 래핑 가능
+      let csv = text;
+      if (ep.name.startsWith('gviz')) {
+        // gviz/tq?tqx=out:csv 는 보통 순수 CSV 반환하지만, 안전 차원에서 처리
+        csv = csv.replace(/^[)\]}'\s]+/, '').trim();
+      }
+      const md = csvToMarkdownTable(csv, ',');
+      const sheetIdShort = (pubMatch ? pubMatch[1] : stdMatch[1]).slice(0, 8);
+      const title = `Google Sheets — ${sheetIdShort}${gidM ? ` (gid:${gid})` : ''}`;
+      closeWikiModal();
+      showFileImportPreview([{
+        title,
+        body: `# ${title}\n\n출처: ${ep.url}\n엔드포인트: ${ep.name}\n업로드: ${new Date().toLocaleString('ko-KR')}\n\n${md}`,
+        category: '기타',
+        tags: ['업로드', 'google-sheets', ep.name],
+        source: ep.url,
+      }]);
+      success = true;
+      break;
+    } catch (e) {
+      lastErr = `${ep.name}: ${e.message || '실패'}`;
     }
-    const md = csvToMarkdownTable(csv, ',');
-    const title = `Google Sheets — ${sheetId.slice(0, 8)} (gid:${gid})`;
-    closeWikiModal();
-    showFileImportPreview([{
-      title,
-      body: `# ${title}\n\n출처: ${exportUrl}\n업로드: ${new Date().toLocaleString('ko-KR')}\n\n${md}`,
-      category: '기타',
-      tags: ['업로드', 'google-sheets'],
-      source: exportUrl,
-    }]);
-  } catch (e) {
-    showToast('⚠ ' + (e.message || '가져오기 실패'));
+  }
+
+  if (!success) {
+    showToast(`⚠ 모든 엔드포인트 실패 (${lastErr}) — 파일 → 다운로드 → Excel 권장`);
     btn.disabled = false; btn.textContent = '🔄 가져오기';
   }
 }
