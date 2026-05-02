@@ -11,6 +11,8 @@ import {
   Swords,
   Radar,
   WandSparkles,
+  Mic2,
+  Film,
   Sparkles,
   Brain,
 } from "lucide-react";
@@ -49,7 +51,11 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: "생성",
-    items: [{ href: "/studio", label: "Studio", icon: WandSparkles }],
+    items: [
+      { href: "/studio", label: "Studio", icon: WandSparkles },
+      { href: "/tts", label: "AI 음성 (TTS)", icon: Mic2 },
+      { href: "/video", label: "영상 메이커", icon: Film },
+    ],
   },
   {
     title: "성장",
