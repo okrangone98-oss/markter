@@ -47,6 +47,7 @@ export interface WikiPageRow {
   content: string;
   category: string | null;
   tags: string[] | null;
+  source: string | null;
   // pgvector 임베딩은 클라이언트 코드에서는 number[]로 다룹니다.
   embedding: number[] | null;
   created_at: string;
@@ -60,6 +61,7 @@ export interface WikiPageInsert {
   content: string;
   category?: string | null;
   tags?: string[] | null;
+  source?: string | null;
   embedding?: number[] | null;
   created_at?: string;
   updated_at?: string;
@@ -72,6 +74,7 @@ export interface WikiPageUpdate {
   content?: string;
   category?: string | null;
   tags?: string[] | null;
+  source?: string | null;
   embedding?: number[] | null;
   created_at?: string;
   updated_at?: string;

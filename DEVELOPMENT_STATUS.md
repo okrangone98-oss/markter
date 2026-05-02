@@ -2,7 +2,9 @@
 
 > **자동 갱신 문서.** 사용자가 "개발현황" 이라고 말하면 Claude가 이 문서를 최신 상태로 다시 써서 GitHub에 푸시합니다. 다른 플랫폼/세션에서도 이 문서만 읽으면 어디까지 만들었는지 즉시 파악할 수 있도록 작성합니다.
 
-**최종 갱신**: 2026-05-02 · **현재 브랜치**: `claude/add-tts-video-features-UEAy7`
+**최종 갱신**: 2026-05-02 (4회차) · **현재 브랜치**: `claude/add-tts-video-features-UEAy7`
+
+> 🆕 **이번 갱신 요점**: v1.0 **위키 풀 구현** (Supabase CRUD + 사이드바 + 대시보드 + 에디터 + 자동 저장). **Karpathy 코딩 원칙** 통합 (`.claude/skills/`). **마케터 링크함** 신규 페이지 (v0.1+v1.0, 50+ 큐레이션 링크: NotebookLM·AI Studio·Stitch·네이버·Canva·Suno 등).
 
 ---
 
@@ -68,7 +70,9 @@
 | Wiki Ingest/Query/Lint | ✅ | LLM 기반 |
 | AI 자동 개선 루프 | ✅ | autoresearch (5축 평가 + 재생성 N회) |
 | 위키 컨텍스트 자동 주입 | ✅ | buildPrompt 래퍼 |
-| **위키 파일 업로드** | ✅ | **NEW** Excel · PDF · CSV · Google Sheets |
+| **위키 파일 업로드** | ✅ | Excel · PDF · CSV · Google Sheets (다중 엔드포인트 폴백) |
+| **위키 지식 대시보드** | ✅ | 4 stat cards + 카테고리 분포 + 최근/공백/태그/출처 + 14일 히트맵 |
+| **마케터 링크함** | ✅ | **NEW** 50+ 큐레이션 도구 (NotebookLM·AI Studio·Stitch·네이버·Canva·Suno 등) |
 | 차트 분석 | ✅ | Chart.js |
 | 위키 JSON 백업/복원 | ✅ | |
 | experiments 로그 | ✅ | LocalStorage `flowai_experiments` |
@@ -130,16 +134,22 @@
 - URL: https://okrangone98-oss.github.io/markter/
 - 빌드: 자동 (main 브랜치 push 시)
 
-### 5.2 Vercel (v1.0 — 환경변수 마무리 중)
+### 5.2 Vercel (v1.0 — Redeploy 클릭만 남음)
 - ✅ Step A: 프로젝트 import (Root Directory = `marketing-brain`)
-- ✅ Step B: Supabase Integration 연결 (3 env vars 자동)
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`
-- ❌ **Step C**: 수동 추가 필요 (현재 막힌 단계 — 에러 원인)
-  - `OPENROUTER_API_KEY` = `sk-or-v1-...` (openrouter.ai/keys 발급)
-  - `NEXT_PUBLIC_APP_NAME` = `Marketing Brain`
-- ❌ **Step D**: Redeploy → 라이브 URL 검증
+- ✅ Step B: Supabase Integration 연결 (자동 주입된 변수 다수)
+  - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_PUBLISHABLE_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY` (Sensitive)
+  - `SUPABASE_JWT_SECRET` (Sensitive)
+  - `POSTGRES_URL` (Sensitive)
+- ✅ **Step C**: 수동 추가 완료 (Production + Preview, Sensitive)
+  - `OPENROUTER_API_KEY` ✓
+  - `NEXT_PUBLIC_APP_NAME` = `Marketing Brain` ✓
+- 🚧 **Step D**: Redeploy 진행 중 — Deployments → ⋯ → Redeploy (Build Cache 해제)
+- ❌ Step E (예정): markter.vercel.app 접속 → 사이드바·TTS·Video 페이지 동작 검증
+
+> ℹ️ **Sensitive 토글 정책**: Vercel은 한 번 Sensitive로 켠 변수는 끌 수 없음. 우리 케이스에서는 문제 없음 — Production/Preview만 체크되어 있어도 markter.vercel.app(운영)은 정상 빌드됨. Development(로컬 vercel dev)는 사용 안 함.
 
 ### 5.3 Supabase
 - 프로젝트 URL: `https://bsrmdvtyubjaekkreavs.supabase.co`

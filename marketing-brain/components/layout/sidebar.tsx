@@ -15,6 +15,7 @@ import {
   Film,
   Sparkles,
   Brain,
+  ExternalLink,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -60,6 +61,10 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "성장",
     items: [{ href: "/coach", label: "Coach", icon: Sparkles }],
+  },
+  {
+    title: "도구함",
+    items: [{ href: "/links", label: "링크 모음", icon: ExternalLink }],
   },
 ];
 
