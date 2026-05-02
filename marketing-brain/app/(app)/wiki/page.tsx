@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip } from "@/components/ui/tooltip";
 import { UploadDialog } from "@/components/wiki/upload-dialog";
+import { IngestDialog } from "@/components/wiki/ingest-dialog";
+import { QueryDialog } from "@/components/wiki/query-dialog";
 
 /* ══════════════════════════════════════════════════════════
    메인 페이지
@@ -26,6 +28,8 @@ import { UploadDialog } from "@/components/wiki/upload-dialog";
 export default function WikiPage() {
   const { pages, currentPageId, fetchPages, loading, error } = useWikiStore();
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [ingestOpen, setIngestOpen] = useState(false);
+  const [queryOpen, setQueryOpen] = useState(false);
 
   useEffect(() => { fetchPages(); }, [fetchPages]);
 
@@ -33,7 +37,11 @@ export default function WikiPage() {
 
   return (
     <div className="flex h-[calc(100vh-5.5rem)] gap-4">
-      <WikiSidebar onUploadClick={() => setUploadOpen(true)} />
+      <WikiSidebar
+        onUploadClick={() => setUploadOpen(true)}
+        onIngestClick={() => setIngestOpen(true)}
+        onQueryClick={() => setQueryOpen(true)}
+      />
       <main className="flex-1 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40 p-6">
         {loading && pages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-slate-500">
@@ -45,11 +53,18 @@ export default function WikiPage() {
         ) : currentPage ? (
           <WikiEditor page={currentPage} allPages={pages} />
         ) : (
-          <WikiDashboard pages={pages} onUploadClick={() => setUploadOpen(true)} />
+          <WikiDashboard
+            pages={pages}
+            onUploadClick={() => setUploadOpen(true)}
+            onIngestClick={() => setIngestOpen(true)}
+            onQueryClick={() => setQueryOpen(true)}
+          />
         )}
       </main>
 
       <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} />
+      <IngestDialog open={ingestOpen} onClose={() => setIngestOpen(false)} />
+      <QueryDialog open={queryOpen} onClose={() => setQueryOpen(false)} />
     </div>
   );
 }
@@ -57,7 +72,15 @@ export default function WikiPage() {
 /* ══════════════════════════════════════════════════════════
    사이드바
    ══════════════════════════════════════════════════════════ */
-function WikiSidebar({ onUploadClick }: { onUploadClick: () => void }) {
+function WikiSidebar({
+  onUploadClick,
+  onIngestClick,
+  onQueryClick,
+}: {
+  onUploadClick: () => void;
+  onIngestClick: () => void;
+  onQueryClick: () => void;
+}) {
   const { pages, currentPageId, search, setSearch, selectPage, createPage } = useWikiStore();
 
   const filtered = useMemo(() => {
@@ -136,18 +159,24 @@ function WikiSidebar({ onUploadClick }: { onUploadClick: () => void }) {
         )}
       </div>
 
-      <div className="border-t border-slate-800 pt-3 space-y-1 opacity-60">
+      <div className="border-t border-slate-800 pt-3 space-y-1">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
-          ⚡ AI 작업 (다음 마일스톤)
+          ⚡ AI 작업
         </div>
-        <Tooltip content="텍스트·URL을 붙여넣으면 LLM이 위키 페이지를 자동 제안. pgvector RAG 연결 후 활성화됩니다.">
-          <button className="w-full rounded px-2 py-1.5 text-left text-xs text-slate-500 cursor-not-allowed" disabled>
-            📥 인제스트
+        <Tooltip content="텍스트를 붙여넣으면 LLM이 분석해 신규/갱신 위키 페이지를 자동 제안합니다.">
+          <button
+            onClick={onIngestClick}
+            className="w-full flex items-center gap-1.5 rounded px-2 py-1.5 text-left text-xs text-slate-300 hover:bg-slate-800/60 hover:text-[var(--color-primary)] transition-colors"
+          >
+            📥 AI 인제스트
           </button>
         </Tooltip>
-        <Tooltip content="자연어 질문 → 위키 의미 검색 → LLM 답변. pgvector 임베딩 적용 후 활성화됩니다.">
-          <button className="w-full rounded px-2 py-1.5 text-left text-xs text-slate-500 cursor-not-allowed" disabled>
-            ❓ 쿼리
+        <Tooltip content="자연어로 질문하면 위키를 검색해 답변. 답변을 새 페이지로 저장 가능.">
+          <button
+            onClick={onQueryClick}
+            className="w-full flex items-center gap-1.5 rounded px-2 py-1.5 text-left text-xs text-slate-300 hover:bg-slate-800/60 hover:text-[var(--color-primary)] transition-colors"
+          >
+            ❓ AI 쿼리
           </button>
         </Tooltip>
       </div>
@@ -170,7 +199,17 @@ function WikiSidebar({ onUploadClick }: { onUploadClick: () => void }) {
 /* ══════════════════════════════════════════════════════════
    대시보드 (v0.1 패턴 포팅 — Obsidian/Outline 스타일)
    ══════════════════════════════════════════════════════════ */
-function WikiDashboard({ pages, onUploadClick }: { pages: WikiPage[]; onUploadClick: () => void }) {
+function WikiDashboard({
+  pages,
+  onUploadClick,
+  onIngestClick,
+  onQueryClick,
+}: {
+  pages: WikiPage[];
+  onUploadClick: () => void;
+  onIngestClick: () => void;
+  onQueryClick: () => void;
+}) {
   const { createPage, selectPage, filterByCategory, filterByTag } = useWikiStore();
 
   const total = pages.length;
@@ -422,8 +461,11 @@ function WikiDashboard({ pages, onUploadClick }: { pages: WikiPage[]; onUploadCl
         <Button variant="secondary" size="sm" onClick={onUploadClick}>
           📂 Excel · PDF · CSV 업로드
         </Button>
-        <Button variant="secondary" size="sm" disabled>
-          🤖 AI 인제스트 (준비 중)
+        <Button variant="secondary" size="sm" onClick={onIngestClick}>
+          🤖 AI 인제스트
+        </Button>
+        <Button variant="secondary" size="sm" onClick={onQueryClick}>
+          ❓ AI 쿼리
         </Button>
       </div>
     </div>
