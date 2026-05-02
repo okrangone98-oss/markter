@@ -1,10 +1,18 @@
 // 미들웨어용 Supabase 세션 갱신 헬퍼
 // - 모든 요청에서 세션 쿠키를 자동으로 갱신합니다.
+// - 인증이 필요한 라우트 보호도 여기서 처리합니다 (/login, /auth/* 는 공개).
 // - 자세한 패턴: https://supabase.com/docs/guides/auth/server-side/nextjs
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "./types";
+
+// 인증 없이 접근 가능한 경로 prefix 목록
+const PUBLIC_PATHS = ["/login", "/auth/", "/api/auth/", "/_next/", "/favicon"];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+}
 
 /**
  * 미들웨어에서 호출해 Supabase 세션을 갱신합니다.
@@ -45,12 +53,26 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   });
 
   // IMPORTANT: getUser() 호출은 세션 토큰을 검증·갱신하는 핵심 동작입니다.
-  // 이 줄을 제거하면 세션이 자동 갱신되지 않습니다.
+  let user = null;
   try {
-    await supabase.auth.getUser();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
   } catch (error) {
     // 네트워크 오류 등은 미들웨어를 막지 않도록 콘솔에만 남깁니다.
     console.error("[Supabase middleware] 세션 갱신 중 오류:", error);
+  }
+
+  // 인증 게이팅 — 비공개 라우트인데 세션이 없으면 /login 으로 리다이렉트
+  const pathname = request.nextUrl.pathname;
+  if (!user && !isPublicPath(pathname) && pathname !== "/") {
+    const loginUrl = new URL("/login", request.nextUrl.origin);
+    loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // 이미 로그인했는데 /login 에 접근하면 dashboard 로 보냄
+  if (user && pathname === "/login") {
+    return NextResponse.redirect(new URL("/dashboard", request.nextUrl.origin));
   }
 
   return supabaseResponse;
