@@ -13,7 +13,7 @@ import {
   PlayCircle
 } from "lucide-react";
 import Link from "next/link";
-import { createBrowserClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { UserAudio, uploadAudio, fetchUserAudios, deleteUserAudio } from "@/lib/supabase/audios";
 
 import { cn } from "@/lib/utils";
@@ -136,7 +136,7 @@ export default function TTSPage() {
 
   /* 유저 및 라이브러리 초기화 */
   useEffect(() => {
-    const supabase = createBrowserClient();
+    const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id);

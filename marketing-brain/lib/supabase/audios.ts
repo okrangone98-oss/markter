@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 
 export interface UserAudio {
   id: string;
@@ -11,7 +11,7 @@ export interface UserAudio {
 }
 
 export async function uploadAudio(blob: Blob, title: string, engine: string, userId: string): Promise<UserAudio> {
-  const supabase = createBrowserClient();
+  const supabase = createClient();
   const ext = blob.type.includes("mpeg") ? "mp3" : "wav";
   const fileName = `${userId}/${Date.now()}_${title.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
   
@@ -40,14 +40,14 @@ export async function uploadAudio(blob: Blob, title: string, engine: string, use
 }
 
 export async function fetchUserAudios(): Promise<UserAudio[]> {
-  const supabase = createBrowserClient();
+  const supabase = createClient();
   const { data, error } = await supabase.from('user_audios').select('*').order('created_at', { ascending: false });
   if (error) throw error;
   return data as UserAudio[];
 }
 
 export async function deleteUserAudio(id: string, storagePath: string): Promise<void> {
-  const supabase = createBrowserClient();
+  const supabase = createClient();
   await supabase.storage.from('audios').remove([storagePath]);
   const { error } = await supabase.from('user_audios').delete().eq('id', id);
   if (error) throw error;
