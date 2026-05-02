@@ -60,6 +60,19 @@ interface VideoState {
   rendered: { blob: Blob; url: string; ext: string } | null;
 }
 
+const PUTER_VOICES = [
+  { id: "Seoyeon", name: "서연 (여성)" },
+  { id: "InJoon", name: "인준 (남성, Azure/Puter)" },
+  { id: "SunHi", name: "선희 (여성, Azure/Puter)" },
+];
+
+const ELEVENLABS_VOICES = [
+  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel (다국어)" },
+  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam (서술형)" },
+  { id: "yoZ06aMxZJJ28mfd3POQ", name: "Sam (중간 음조)" },
+  { id: "ErXwobaYiN019PkySvjV", name: "Antoni (부드러운 남성)" },
+];
+
 /* ── 상수 ── */
 const RATIO_DIM: Record<Ratio, { w: number; h: number }> = {
   "9:16": { w: 720, h: 1280 },
@@ -311,6 +324,9 @@ export default function VideoPage() {
   const [progressLabel, setProgressLabel] = useState("");
   const [toast, setToast] = useState("");
   const [generatingTTS, setGeneratingTTS] = useState(false);
+  const [ttsEngine, setTtsEngine] = useState<"puter" | "elevenlabs">("puter");
+  const [ttsVoice, setTtsVoice] = useState(PUTER_VOICES[0].id);
+  const [ttsApiKey, setTtsApiKey] = useState("");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
@@ -456,14 +472,18 @@ export default function VideoPage() {
   async function generateSlideImage(id: string) {
     const sl = state.slides.find((s) => s.id === id);
     if (!sl) return;
-    const prompt = (sl.title + " " + sl.body).trim();
-    if (!prompt) { showToast("⚠ 제목/본문을 먼저 입력하세요"); return; }
+    const baseText = (sl.title + " " + sl.body).trim();
+    if (!baseText) { showToast("⚠ 제목/본문을 먼저 입력하세요"); return; }
+    
+    // 핵심 컨셉을 담은 프롬프트로 변환
+    const prompt = `Cinematic concept art representing the core meaning of this scene: "${baseText}"`;
+    
     const w = window as unknown as { puter?: { ai?: { txt2img?: (p: string, o: Record<string, unknown>) => Promise<{ src: string }> } } };
     if (!w.puter?.ai?.txt2img) { showToast("⚠ Puter SDK 미로드 — 잠시 후 다시 시도"); return; }
     showToast("🎨 이미지 생성 중...");
     try {
       const dim = RATIO_DIM[state.ratio];
-      const img = await w.puter.ai.txt2img(prompt + ", cinematic, high quality", {
+      const img = await w.puter.ai.txt2img(prompt + ", high quality, detailed, masterpiece", {
         model: "flux-schnell",
         width: dim.w,
         height: dim.h,
@@ -499,22 +519,43 @@ export default function VideoPage() {
       return;
     }
     setGeneratingTTS(true);
-    showToast("음성 생성 중 (무료 TTS)...");
+    showToast(`음성 생성 중 (${ttsEngine === "puter" ? "Puter 무료" : "ElevenLabs"})...`);
     try {
-      const w = window as any;
-      if (!w.puter?.ai?.txt2speech) throw new Error("Puter SDK가 아직 준비되지 않았습니다. 페이지를 새로고침 해주세요.");
-      
-      const audio = await w.puter.ai.txt2speech(text, { voice: "Seoyeon", engine: "neural" });
-      const src = audio.src || audio.currentSrc;
-      if (!src) throw new Error("오디오 소스를 받을 수 없습니다.");
-      
-      const resp = await fetch(src);
-      const blob = await resp.blob();
+      let blob: Blob;
+      if (ttsEngine === "puter") {
+        const w = window as any;
+        if (!w.puter?.ai?.txt2speech) throw new Error("Puter SDK가 아직 준비되지 않았습니다. 새로고침 해주세요.");
+        
+        const audio = await w.puter.ai.txt2speech(text, { voice: ttsVoice, engine: "neural" });
+        const src = audio.src || audio.currentSrc;
+        if (!src) throw new Error("오디오 소스를 받을 수 없습니다.");
+        
+        const resp = await fetch(src);
+        blob = await resp.blob();
+      } else {
+        if (!ttsApiKey.trim()) throw new Error("ElevenLabs API 키가 필요합니다.");
+        const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ttsVoice}`, {
+          method: "POST",
+          headers: {
+            "xi-api-key": ttsApiKey.trim(),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text,
+            model_id: "eleven_multilingual_v2",
+          }),
+        });
+        if (!resp.ok) {
+          const err = await resp.text();
+          throw new Error("ElevenLabs 생성 실패");
+        }
+        blob = await resp.blob();
+      }
       
       const url = URL.createObjectURL(blob);
       setState((s) => ({
         ...s,
-        narration: { name: "자동생성_내레이션.mp3", blob, url },
+        narration: { name: `자동생성_내레이션_${ttsEngine}.mp3`, blob, url },
       }));
       showToast("✓ 슬라이드 내레이션 자동 생성 완료!");
     } catch (e: any) {
@@ -837,37 +878,73 @@ export default function VideoPage() {
                 <Label className="flex items-center gap-1.5">
                   <Mic className="h-3.5 w-3.5" /> 내레이션 (TTS 음성)
                 </Label>
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="audio/*"
-                      className="hidden"
-                      onChange={(e) => { if (e.target.files?.[0]) onNarrationFile(e.target.files[0]); }}
-                    />
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-600 cursor-pointer">
-                      <Upload className="h-3.5 w-3.5" /> 파일 업로드
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        className="hidden"
+                        onChange={(e) => { if (e.target.files?.[0]) onNarrationFile(e.target.files[0]); }}
+                      />
+                      <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-600 cursor-pointer">
+                        <Upload className="h-3.5 w-3.5" /> 파일 업로드
+                      </span>
+                    </label>
+                    <span className="flex-1 truncate text-xs text-slate-500 min-w-[120px]">
+                      {state.narration
+                        ? state.narration.name
+                        : ttsResult
+                        ? "TTS 페이지 음성 연결됨 ✓"
+                        : "없음"}
                     </span>
-                  </label>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs bg-slate-800 border-slate-700 hover:bg-[var(--color-primary)]/20 hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/50 text-slate-300"
-                    onClick={generateSlideTTS}
-                    disabled={generatingTTS}
-                  >
-                    <Mic className="h-3 w-3 mr-1" />
-                    {generatingTTS ? "생성 중..." : "슬라이드 텍스트로 무료 자동생성"}
-                  </Button>
+                  </div>
 
-                  <span className="flex-1 truncate text-xs text-slate-500 w-full mt-1">
-                    {state.narration
-                      ? state.narration.name
-                      : ttsResult
-                      ? "TTS 페이지 음성 연결됨 ✓"
-                      : "없음"}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-slate-800 bg-slate-900/50 p-2">
+                    <select
+                      value={ttsEngine}
+                      onChange={(e) => {
+                        const eng = e.target.value as any;
+                        setTtsEngine(eng);
+                        setTtsVoice(eng === "puter" ? PUTER_VOICES[0].id : ELEVENLABS_VOICES[0].id);
+                      }}
+                      className="h-7 rounded border border-slate-700 bg-slate-800 px-2 text-[11px] text-slate-200 outline-none focus:border-slate-500"
+                    >
+                      <option value="puter">Puter (무료)</option>
+                      <option value="elevenlabs">ElevenLabs</option>
+                    </select>
+                    
+                    <select
+                      value={ttsVoice}
+                      onChange={(e) => setTtsVoice(e.target.value)}
+                      className="h-7 max-w-[140px] truncate rounded border border-slate-700 bg-slate-800 px-2 text-[11px] text-slate-200 outline-none focus:border-slate-500"
+                    >
+                      {(ttsEngine === "puter" ? PUTER_VOICES : ELEVENLABS_VOICES).map(v => (
+                        <option key={v.id} value={v.id}>{v.name}</option>
+                      ))}
+                    </select>
+
+                    {ttsEngine === "elevenlabs" && (
+                      <input
+                        type="password"
+                        placeholder="API Key"
+                        value={ttsApiKey}
+                        onChange={(e) => setTtsApiKey(e.target.value)}
+                        className="h-7 w-20 rounded border border-slate-700 bg-slate-800 px-2 text-[11px] text-slate-200 outline-none focus:border-slate-500"
+                      />
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-[11px] bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20 hover:text-amber-300 text-amber-400 ml-auto"
+                      onClick={generateSlideTTS}
+                      disabled={generatingTTS}
+                    >
+                      <Mic className="h-3 w-3 mr-1" />
+                      {generatingTTS ? "생성 중..." : "자동 생성"}
+                    </Button>
+                  </div>
                 </div>
                 {!ttsResult && !state.narration && (
                   <p className="text-[11px] text-slate-600">
