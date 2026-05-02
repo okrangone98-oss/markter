@@ -422,6 +422,218 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 }
 .chart-title{font-size:0.82rem;color:var(--muted2);margin-bottom:16px;font-weight:500}
 
+/* ── TTS 엔진 카드 ── */
+.tts-engine-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.tts-engine{
+  position:relative;background:var(--s2);border:1px solid var(--border);
+  border-radius:12px;padding:14px 12px;cursor:pointer;transition:all 0.2s;
+}
+.tts-engine:hover{border-color:var(--border2);transform:translateY(-1px)}
+.tts-engine.active{border-color:var(--cyan);background:var(--cyan-dim);box-shadow:0 0 0 1px var(--cyan-border)}
+.tts-engine-icon{font-size:1.4rem;margin-bottom:6px}
+.tts-engine-name{font-size:0.86rem;font-weight:600;color:var(--text)}
+.tts-engine-desc{font-size:0.7rem;color:var(--muted2);margin-top:4px;line-height:1.4}
+.tts-engine-badge{
+  position:absolute;top:10px;right:10px;
+  font-size:0.6rem;padding:2px 7px;border-radius:10px;font-weight:600;letter-spacing:0.3px;
+}
+.tts-engine-badge.free{background:rgba(0,229,200,0.15);color:var(--cyan);border:1px solid var(--cyan-border)}
+.tts-engine-badge.paid{background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3)}
+
+/* range sliders */
+input[type="range"]{
+  -webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;
+  background:var(--s3);outline:none;cursor:pointer;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--cyan);cursor:pointer;box-shadow:0 0 0 3px rgba(0,229,200,0.15);
+}
+input[type="range"]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;border:none;
+  background:var(--cyan);cursor:pointer;box-shadow:0 0 0 3px rgba(0,229,200,0.15);
+}
+
+/* ── 영상 메이커 ── */
+.vid-slide-list{
+  display:flex;flex-direction:column;gap:8px;
+  max-height:380px;overflow-y:auto;
+  background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px;
+}
+.vid-slide-list:empty::before{
+  content:"슬라이드를 추가하거나 카드뉴스/영상 대본에서 가져오세요.";
+  display:block;text-align:center;color:var(--muted);font-size:0.78rem;padding:30px 0;font-style:italic;
+}
+.vid-slide{
+  display:grid;grid-template-columns:auto 80px 1fr auto;gap:10px;align-items:center;
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;
+  transition:all 0.2s;
+}
+.vid-slide:hover{border-color:var(--border2)}
+.vid-slide-handle{cursor:grab;color:var(--muted);font-size:1rem;padding:0 4px;user-select:none}
+.vid-slide-handle:active{cursor:grabbing}
+.vid-slide-thumb{
+  width:80px;height:80px;border-radius:6px;background:var(--s3);
+  background-size:cover;background-position:center;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.4rem;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.vid-slide-thumb input{display:none}
+.vid-slide-thumb-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,0.4);color:#fff;font-size:0.6rem;
+  display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;
+}
+.vid-slide-thumb:hover .vid-slide-thumb-overlay{opacity:1}
+.vid-slide-fields{display:flex;flex-direction:column;gap:6px;min-width:0}
+.vid-slide-fields input, .vid-slide-fields textarea{
+  background:var(--s1);border:1px solid var(--border);border-radius:6px;
+  padding:6px 9px;color:var(--text);font-size:0.78rem;font-family:inherit;
+  outline:none;transition:border 0.2s;width:100%;
+}
+.vid-slide-fields input:focus, .vid-slide-fields textarea:focus{border-color:var(--cyan)}
+.vid-slide-fields textarea{resize:vertical;min-height:36px;line-height:1.5}
+.vid-slide-actions{display:flex;flex-direction:column;gap:4px}
+.vid-slide-actions button{
+  background:transparent;border:1px solid var(--border);border-radius:5px;
+  color:var(--muted2);font-size:0.7rem;padding:4px 8px;cursor:pointer;transition:all 0.15s;
+}
+.vid-slide-actions button:hover{border-color:var(--red);color:var(--red)}
+.vid-slide-actions button.gen{color:var(--cyan)}
+.vid-slide-actions button.gen:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.vid-preview-wrap{
+  background:#000;border-radius:12px;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;
+}
+.vid-preview-wrap canvas{
+  max-width:100%;max-height:520px;display:block;
+  background:#0a0a0a;
+}
+.vid-preview-controls{
+  display:flex;gap:8px;padding:10px;background:var(--s2);width:100%;
+  border-top:1px solid var(--border);
+}
+
+.vid-progress-bar{
+  height:8px;background:var(--s3);border-radius:4px;overflow:hidden;
+}
+.vid-progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--cyan),#a78bfa);
+  width:0%;transition:width 0.25s ease;
+}
+
+.sortable-ghost{opacity:0.4}
+
+/* ── Wiki ── */
+.wiki-layout{display:grid;grid-template-columns:280px 1fr;gap:18px;min-height:calc(100vh - 110px)}
+@media (max-width:900px){ .wiki-layout{grid-template-columns:1fr} }
+.wiki-sidebar{
+  background:var(--s1);border:1px solid var(--border);border-radius:12px;
+  padding:14px;display:flex;flex-direction:column;height:fit-content;max-height:calc(100vh - 110px);overflow-y:auto;
+  position:sticky;top:80px;
+}
+.wiki-aibtn{
+  background:transparent;border:1px solid var(--border);color:var(--text);
+  padding:8px 12px;border-radius:7px;font-family:inherit;font-size:0.78rem;
+  cursor:pointer;text-align:left;width:100%;margin-bottom:5px;
+  transition:all 0.15s;
+}
+.wiki-aibtn:hover{border-color:var(--cyan);background:var(--cyan-dim);color:var(--cyan)}
+.wiki-list{display:flex;flex-direction:column;gap:2px;margin-top:6px;max-height:280px;overflow-y:auto}
+.wiki-list:empty::before{
+  content:"페이지가 없습니다";display:block;color:var(--muted);
+  font-size:0.72rem;font-style:italic;text-align:center;padding:14px 0;
+}
+.wiki-list-item{
+  background:transparent;border:1px solid transparent;border-radius:6px;
+  padding:7px 10px;cursor:pointer;text-align:left;font-size:0.78rem;
+  color:var(--text);transition:all 0.15s;display:flex;flex-direction:column;gap:2px;
+}
+.wiki-list-item:hover{background:var(--s2);border-color:var(--border2)}
+.wiki-list-item.active{background:var(--cyan-dim);border-color:var(--cyan-border);color:var(--cyan)}
+.wiki-list-cat{font-size:0.66rem;color:var(--muted);letter-spacing:0.3px}
+.wiki-list-title{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wiki-cat-header{
+  font-size:0.66rem;color:var(--muted2);text-transform:uppercase;
+  letter-spacing:0.6px;margin:8px 4px 2px;font-weight:600;
+}
+
+.wiki-main{
+  background:var(--s1);border:1px solid var(--border);border-radius:12px;
+  padding:18px;display:flex;flex-direction:column;
+}
+.wiki-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:50px 20px;color:var(--muted);
+}
+.wiki-toolbar{display:flex;gap:8px;margin-bottom:8px}
+.wiki-toolbar > input{flex:1}
+.wiki-editor-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  height:520px;
+}
+@media (max-width:900px){ .wiki-editor-row{grid-template-columns:1fr;height:auto} }
+.wiki-editor-row textarea{
+  font-family:'SF Mono','Monaco','Consolas',monospace;
+  font-size:0.82rem;line-height:1.6;
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:14px;color:var(--text);resize:none;height:100%;
+}
+.wiki-preview{
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:18px;overflow-y:auto;font-size:0.85rem;line-height:1.7;color:var(--text);
+}
+.wiki-preview h1{font-size:1.4rem;margin:0 0 12px;color:var(--cyan)}
+.wiki-preview h2{font-size:1.1rem;margin:18px 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.wiki-preview h3{font-size:0.95rem;margin:14px 0 6px;color:var(--purple)}
+.wiki-preview p{margin:8px 0}
+.wiki-preview ul, .wiki-preview ol{padding-left:22px;margin:6px 0}
+.wiki-preview li{margin:3px 0}
+.wiki-preview code{background:var(--s3);padding:1px 6px;border-radius:4px;font-size:0.85em;color:var(--cyan)}
+.wiki-preview pre{background:var(--s3);padding:12px;border-radius:6px;overflow-x:auto}
+.wiki-preview blockquote{border-left:3px solid var(--cyan);padding:4px 12px;margin:10px 0;color:var(--muted2);background:rgba(0,229,200,0.05)}
+.wiki-preview a{color:var(--cyan)}
+.wiki-preview .wikilink{
+  background:rgba(167,139,250,0.12);color:var(--purple);
+  padding:1px 6px;border-radius:4px;text-decoration:none;border:1px solid rgba(167,139,250,0.3);
+  font-size:0.86em;cursor:pointer;
+}
+.wiki-preview .wikilink.dead{color:var(--muted);background:rgba(255,255,255,0.04);border-color:var(--border);text-decoration:line-through}
+
+.wiki-backlinks{
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;
+}
+.wiki-backlinks-title{font-size:0.74rem;color:var(--muted2);font-weight:600;margin-bottom:6px;letter-spacing:0.4px}
+.wiki-backlink-item{
+  display:inline-block;background:var(--s3);border:1px solid var(--border);
+  padding:3px 9px;border-radius:6px;font-size:0.74rem;color:var(--text);margin:2px;cursor:pointer;
+}
+.wiki-backlink-item:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Wiki modal content */
+.wiki-modal-section{
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:12px;margin-top:10px;
+}
+.wiki-diff-add{color:#4ade80}
+.wiki-diff-update{color:var(--amber)}
+
+/* Auto-refine */
+.refine-iter{
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:12px;margin-top:10px;
+}
+.refine-iter-head{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.78rem;color:var(--muted2);margin-bottom:8px;
+}
+.refine-score{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--cyan-dim);color:var(--cyan);padding:2px 10px;border-radius:10px;
+  font-size:0.74rem;font-weight:600;
+}
+.refine-score.best{background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)}
+
 </style>
 </head>
 <body>
@@ -461,6 +673,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <button class="nav-item" onclick="switchPage('image',this)">
     <span class="nav-icon">🖼</span> 이미지 생성
     <span class="nav-badge">NEW</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('tts',this)">
+    <span class="nav-icon">🎙</span> AI 음성 (TTS)
+    <span class="nav-badge">NEW</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('video',this)">
+    <span class="nav-icon">🎥</span> 숏폼 영상 메이커
+    <span class="nav-badge">NEW</span>
+  </button>
+
+  <div class="sidebar-section">지식</div>
+  <button class="nav-item" onclick="switchPage('wiki',this)">
+    <span class="nav-icon">📚</span> 마케팅 지식 위키
+    <span class="nav-badge">AI</span>
   </button>
 
   <div class="sidebar-section">설정</div>
@@ -603,6 +829,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
         </div>
 
         <div style="padding:0 20px 20px;flex-shrink:0">
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--muted2);margin-bottom:10px;cursor:pointer;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+            <input type="checkbox" id="useWikiContext" checked style="accent-color:var(--cyan)">
+            <span>📚 위키 컨텍스트 자동 주입 <span style="color:var(--cyan)" id="wikiCtxInfo">(0개 페이지 활성)</span></span>
+          </label>
           <button class="btn-run" id="runBtn" onclick="runGenerate()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             AI로 생성
@@ -621,6 +851,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
               <button class="view-btn" onclick="setViewMode('editor',this)">에디터</button>
             </div>
             <div class="output-toolbar">
+              <button class="tool-btn primary" onclick="runAutoRefine(3)" title="LLM 판정자가 점수 매기고 자동 개선 (autoresearch 패턴)">✨ 자동 개선 ×3</button>
               <button class="tool-btn" onclick="copyOutput()">📋 복사</button>
               <button class="tool-btn" onclick="saveToHistory()">💾 저장</button>
               <button class="tool-btn" onclick="clearOutput()">✕ 초기화</button>
@@ -761,9 +992,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
           <div class="panel">
             <div class="panel-header">
               <span class="panel-title">🃏 카드 순서 편집 (드래그로 순서 변경)</span>
-              <div style="display:flex;gap:8px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button class="tool-btn" onclick="copyCardText()">📋 전체 복사</button>
-                <button class="tool-btn primary" onclick="exportCardText()">⬇ 텍스트 내보내기</button>
+                <button class="tool-btn" onclick="exportCardText()">⬇ 텍스트 내보내기</button>
+                <button class="tool-btn primary" onclick="sendCardsToVideo()">🎥 영상으로 만들기</button>
+                <button class="tool-btn" onclick="sendCardsToTTS()">🎙 음성으로 듣기</button>
               </div>
             </div>
             <div class="panel-body">
@@ -810,6 +1043,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
               </select>
             </div>
             <button class="btn-run" onclick="runSpecial('script')">영상 대본 생성</button>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="tool-btn primary" onclick="sendScriptToTTS()">🎙 이 대본 음성으로 변환</button>
+              <button class="tool-btn" onclick="sendScriptToVideo()">🎥 영상 메이커로 보내기</button>
+            </div>
           </div>
         </div>
       </div>
@@ -932,6 +1169,354 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 🎙 AI 음성 (TTS) 페이지                                     -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="page-tts" style="display:none">
+      <div style="max-width:980px">
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🎙 AI 음성 합성</span>
+            <span style="font-size:0.72rem;color:var(--muted2)">한국어 자연 음성 · 4가지 엔진 · MP3 다운로드</span>
+          </div>
+          <div class="panel-body" style="gap:18px">
+
+            <!-- 엔진 선택 -->
+            <div class="field">
+              <label class="field-label">음성 엔진</label>
+              <div class="tts-engine-grid">
+                <div class="tts-engine active" data-engine="neural" onclick="selectTtsEngine(this,'neural')">
+                  <div class="tts-engine-icon">🧠</div>
+                  <div class="tts-engine-name">Microsoft Neural</div>
+                  <div class="tts-engine-desc">최고 무료 음질 · 한국어 자연스러움</div>
+                  <div class="tts-engine-badge free">무료</div>
+                </div>
+                <div class="tts-engine" data-engine="puter" onclick="selectTtsEngine(this,'puter')">
+                  <div class="tts-engine-icon">⚡</div>
+                  <div class="tts-engine-name">Puter (영어 강점)</div>
+                  <div class="tts-engine-desc">Polly Neural · 빠른 응답</div>
+                  <div class="tts-engine-badge free">무료</div>
+                </div>
+                <div class="tts-engine" data-engine="openai" onclick="selectTtsEngine(this,'openai')">
+                  <div class="tts-engine-icon">🎯</div>
+                  <div class="tts-engine-name">OpenAI TTS-HD</div>
+                  <div class="tts-engine-desc">스튜디오 품질 · API 키 필요</div>
+                  <div class="tts-engine-badge paid">유료 키</div>
+                </div>
+                <div class="tts-engine" data-engine="elevenlabs" onclick="selectTtsEngine(this,'elevenlabs')">
+                  <div class="tts-engine-icon">💎</div>
+                  <div class="tts-engine-name">ElevenLabs</div>
+                  <div class="tts-engine-desc">최상급 자연스러움 · API 키 필요</div>
+                  <div class="tts-engine-badge paid">유료 키</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 보이스 -->
+            <div class="field">
+              <label class="field-label">보이스</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <select class="sel" id="ttsVoice" style="flex:1"></select>
+                <button class="tool-btn" onclick="refreshNeuralVoices()" id="refreshVoicesBtn" title="브라우저 보이스 새로고침">↻</button>
+              </div>
+              <div style="font-size:0.72rem;color:var(--muted2);margin-top:6px" id="ttsVoiceHint">
+                💡 Microsoft Edge / 최신 Chrome에서 SunHi · InJoon · Hyunsu 등 한국어 Neural 보이스가 가장 자연스럽습니다.
+              </div>
+            </div>
+
+            <!-- API 키 입력 (OpenAI/ElevenLabs) -->
+            <div class="field" id="ttsApiKeyField" style="display:none">
+              <label class="field-label" id="ttsApiKeyLabel">API 키</label>
+              <input type="password" class="inp" id="ttsApiKey" placeholder="sk-...">
+              <div style="font-size:0.72rem;color:var(--muted2);margin-top:6px" id="ttsApiKeyHint"></div>
+            </div>
+
+            <!-- 텍스트 입력 -->
+            <div class="field">
+              <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                <span>읽을 텍스트</span>
+                <span style="font-size:0.72rem;color:var(--muted2)" id="ttsCharCount">0자 · 약 0초</span>
+              </label>
+              <textarea class="ta" id="ttsText" rows="6" placeholder="여기에 음성으로 변환할 텍스트를 붙여넣거나 작성하세요. 영상 대본·카드뉴스에서 자동으로 가져올 수도 있어요."
+                oninput="updateTtsCharCount()"></textarea>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+                <button class="chip" onclick="insertSSMLBreak('300ms')">⏸ 짧은 쉼</button>
+                <button class="chip" onclick="insertSSMLBreak('700ms')">⏸ 중간 쉼</button>
+                <button class="chip" onclick="insertSSMLBreak('1.2s')">⏸ 긴 쉼</button>
+                <button class="chip" onclick="cleanTtsText()">✨ 마크다운 정리</button>
+              </div>
+            </div>
+
+            <!-- 속도 / 피치 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="field">
+                <label class="field-label">속도 <span id="ttsRateVal" style="color:var(--cyan)">1.0×</span></label>
+                <input type="range" id="ttsRate" min="0.5" max="1.6" step="0.05" value="1.0"
+                  oninput="document.getElementById('ttsRateVal').textContent=parseFloat(this.value).toFixed(2)+'×'">
+              </div>
+              <div class="field">
+                <label class="field-label">피치 <span id="ttsPitchVal" style="color:var(--cyan)">1.0</span></label>
+                <input type="range" id="ttsPitch" min="0.7" max="1.4" step="0.05" value="1.0"
+                  oninput="document.getElementById('ttsPitchVal').textContent=parseFloat(this.value).toFixed(2)">
+              </div>
+            </div>
+
+            <button class="btn-run" id="ttsRunBtn" onclick="runTts()">
+              🎙 음성 생성
+            </button>
+          </div>
+        </div>
+
+        <!-- 결과 / 플레이어 -->
+        <div id="ttsResult" style="margin-top:20px;display:none">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">🔊 생성된 음성</span>
+              <div style="display:flex;gap:8px">
+                <button class="tool-btn" onclick="downloadTts()" id="ttsDownloadBtn">⬇ 다운로드</button>
+                <button class="tool-btn" onclick="sendTtsToVideo()" id="ttsToVideoBtn">🎥 영상 메이커로</button>
+                <button class="tool-btn" onclick="clearTts()">✕ 초기화</button>
+              </div>
+            </div>
+            <div class="panel-body" id="ttsPlayerWrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 🎥 숏폼 영상 메이커                                          -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="page-video" style="display:none">
+      <div style="max-width:1100px">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🎥 숏폼 영상 메이커</span>
+            <span style="font-size:0.72rem;color:var(--muted2)">슬라이드 + Ken Burns + 자막 + 내레이션 → MP4 / WebM</span>
+          </div>
+          <div class="panel-body" style="gap:18px">
+
+            <!-- 비율 / 스타일 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="field">
+                <label class="field-label">영상 비율</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <button class="chip active" id="vid-ratio-9:16" onclick="selectVideoRatio(this,'9:16')">▮ 9:16 (쇼츠)</button>
+                  <button class="chip" id="vid-ratio-1:1" onclick="selectVideoRatio(this,'1:1')">■ 1:1</button>
+                  <button class="chip" id="vid-ratio-16:9" onclick="selectVideoRatio(this,'16:9')">▬ 16:9 (유튜브)</button>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">자막 스타일</label>
+                <select class="sel" id="vidCaptionStyle">
+                  <option value="modern" selected>모던 (그라디언트 박스)</option>
+                  <option value="kinetic">키네틱 (단어 강조)</option>
+                  <option value="subtitle">미니멀 자막</option>
+                  <option value="title">큰 제목 (헤드라인)</option>
+                  <option value="none">자막 없음</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 효과 / 트랜지션 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+              <div class="field">
+                <label class="field-label">이미지 효과</label>
+                <select class="sel" id="vidKenBurns">
+                  <option value="auto" selected>Ken Burns (자동 줌/팬)</option>
+                  <option value="zoom-in">줌 인</option>
+                  <option value="zoom-out">줌 아웃</option>
+                  <option value="pan-right">우측 팬</option>
+                  <option value="pan-left">좌측 팬</option>
+                  <option value="none">정적 (효과 없음)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">트랜지션</label>
+                <select class="sel" id="vidTransition">
+                  <option value="fade" selected>페이드</option>
+                  <option value="slide">슬라이드</option>
+                  <option value="cut">컷 (즉시)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">슬라이드 길이 (초)</label>
+                <input type="number" class="inp" id="vidSlideDuration" min="1.5" max="10" step="0.5" value="3.5">
+              </div>
+            </div>
+
+            <!-- 배경음 -->
+            <div class="field">
+              <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                <span>배경 음악 (BGM)</span>
+                <label style="font-size:0.72rem;color:var(--muted2);font-weight:400;cursor:pointer">
+                  <input type="checkbox" id="vidBgmDuck" checked style="vertical-align:middle"> 내레이션 시 자동 감쇠 (Ducking)
+                </label>
+              </label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="file" id="vidBgmFile" accept="audio/*" style="display:none" onchange="onBgmFile(this)">
+                <button class="tool-btn" onclick="document.getElementById('vidBgmFile').click()">📁 음악 파일</button>
+                <span id="vidBgmName" style="font-size:0.78rem;color:var(--muted2);flex:1">선택된 파일 없음</span>
+                <label style="font-size:0.72rem;color:var(--muted2);display:flex;gap:6px;align-items:center">
+                  볼륨 <input type="range" id="vidBgmVol" min="0" max="1" step="0.05" value="0.25" style="width:80px">
+                </label>
+              </div>
+            </div>
+
+            <!-- 내레이션 -->
+            <div class="field">
+              <label class="field-label">내레이션 (TTS 음성)</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="tool-btn primary" onclick="attachLatestTts()">🎙 최근 생성 음성 사용</button>
+                <input type="file" id="vidNarrationFile" accept="audio/*" style="display:none" onchange="onNarrationFile(this)">
+                <button class="tool-btn" onclick="document.getElementById('vidNarrationFile').click()">📁 오디오 파일</button>
+                <span id="vidNarrationName" style="font-size:0.78rem;color:var(--muted2);flex:1">없음</span>
+              </div>
+              <div style="font-size:0.72rem;color:var(--muted2);margin-top:6px">
+                💡 TTS 페이지에서 음성 생성 → 여기 자동 연결. 또는 자체 녹음 파일 업로드.
+              </div>
+            </div>
+
+            <!-- 슬라이드 편집 -->
+            <div class="field">
+              <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                <span>슬라이드 (드래그로 순서 변경)</span>
+                <span style="font-size:0.72rem;color:var(--muted2)">
+                  총 <span id="vidSlideCount">0</span>장 ·
+                  예상 <span id="vidTotalDuration">0</span>초
+                </span>
+              </label>
+              <div id="vidSlideList" class="vid-slide-list"></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                <button class="tool-btn" onclick="addVideoSlide()">＋ 슬라이드 추가</button>
+                <button class="tool-btn" onclick="importFromCardNews()">🃏 카드뉴스에서</button>
+                <button class="tool-btn" onclick="importFromScript()">🎬 영상 대본에서</button>
+                <button class="tool-btn" onclick="clearVideoSlides()">✕ 모두 비우기</button>
+              </div>
+            </div>
+
+            <!-- 미리보기 / 렌더 -->
+            <div class="field">
+              <label class="field-label">미리보기</label>
+              <div class="vid-preview-wrap">
+                <canvas id="vidCanvas" width="720" height="1280"></canvas>
+                <div class="vid-preview-controls">
+                  <button class="tool-btn" onclick="playPreview()" id="vidPlayBtn">▶ 미리보기 재생</button>
+                  <button class="tool-btn" onclick="stopPreview()">■ 정지</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn-run" id="vidRenderBtn" onclick="renderVideo('webm')" style="flex:1;min-width:200px">
+                🎬 영상 렌더 (WebM · 빠름)
+              </button>
+              <button class="btn-run" id="vidRenderMp4Btn" onclick="renderVideo('mp4')" style="flex:1;min-width:200px;background:linear-gradient(135deg,#a78bfa,#7c3aed)">
+                🎞 MP4 렌더 (호환성 최고)
+              </button>
+            </div>
+
+            <div id="vidProgress" style="display:none">
+              <div style="font-size:0.78rem;color:var(--muted2);margin-bottom:6px" id="vidProgressLabel">렌더링 중...</div>
+              <div class="vid-progress-bar"><div class="vid-progress-fill" id="vidProgressFill"></div></div>
+            </div>
+
+            <div id="vidResult" style="display:none">
+              <video id="vidOutput" controls style="width:100%;border-radius:12px;background:#000;max-height:600px"></video>
+              <button class="tool-btn primary" onclick="downloadRenderedVideo()" style="margin-top:10px">⬇ 영상 다운로드</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 📚 마케팅 지식 위키 (Karpathy LLM Wiki 패턴)                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="page-wiki" style="display:none">
+      <div class="wiki-layout">
+        <aside class="wiki-sidebar">
+          <button class="btn-run" onclick="newWikiPage()" style="padding:9px 14px;font-size:0.82rem">+ 새 페이지</button>
+          <input class="inp" id="wikiSearch" placeholder="🔍 페이지 검색..." oninput="renderWikiList()" style="margin-top:10px">
+
+          <div style="font-size:0.7rem;color:var(--muted2);margin-top:14px;font-weight:600;letter-spacing:0.5px">📖 페이지 (<span id="wikiCount">0</span>)</div>
+          <div id="wikiList" class="wiki-list"></div>
+
+          <div style="border-top:1px solid var(--border);margin:14px 0;padding-top:12px">
+            <div style="font-size:0.7rem;color:var(--muted2);font-weight:600;letter-spacing:0.5px;margin-bottom:8px">⚡ AI 작업</div>
+            <button class="wiki-aibtn" onclick="openWikiIngest()">📥 인제스트 (텍스트→위키)</button>
+            <button class="wiki-aibtn" onclick="openWikiQuery()">❓ 쿼리 (질문→답변)</button>
+            <button class="wiki-aibtn" onclick="runWikiLint()">🔍 린트 (모순·고아·노후)</button>
+          </div>
+
+          <div style="border-top:1px solid var(--border);margin:6px 0 0;padding-top:12px">
+            <div style="font-size:0.7rem;color:var(--muted2);font-weight:600;letter-spacing:0.5px;margin-bottom:8px">💾 데이터</div>
+            <button class="wiki-aibtn" onclick="exportWiki()">⬇ JSON 백업</button>
+            <button class="wiki-aibtn" onclick="document.getElementById('wikiImportFile').click()">⬆ JSON 복원</button>
+            <input type="file" id="wikiImportFile" accept="application/json" style="display:none" onchange="importWiki(this)">
+            <button class="wiki-aibtn" style="color:var(--red)" onclick="if(confirm('전체 위키를 삭제하시겠습니까?')) clearWiki()">✕ 전체 삭제</button>
+          </div>
+        </aside>
+
+        <main class="wiki-main">
+          <div id="wikiEmpty" class="wiki-empty">
+            <div style="font-size:3rem;margin-bottom:14px">📚</div>
+            <div style="font-size:1rem;color:var(--text);margin-bottom:6px">마케팅 지식 위키</div>
+            <div style="font-size:0.78rem;color:var(--muted2);max-width:480px;margin:0 auto;line-height:1.7">
+              브랜드 · 경쟁사 · 페르소나 · 캠페인 · 트렌드를 markdown으로 누적합니다.<br>
+              <b style="color:var(--cyan)">콘텐츠 생성 시 자동으로 관련 페이지를 컨텍스트에 주입</b>해 시간이 갈수록 결과 품질이 복리로 올라갑니다.<br><br>
+              왼쪽에서 새 페이지를 만들거나 <b>📥 인제스트</b>로 텍스트·URL에서 시작하세요.
+            </div>
+          </div>
+
+          <div id="wikiEditor" style="display:none">
+            <div class="wiki-toolbar">
+              <input id="wikiTitle" class="inp" placeholder="페이지 제목 (예: 경쟁사 — 카카오)" style="font-size:1rem;font-weight:600">
+              <select id="wikiCategory" class="sel" style="max-width:160px">
+                <option value="브랜드">🏷 브랜드</option>
+                <option value="경쟁사">⚔ 경쟁사</option>
+                <option value="페르소나">👤 페르소나</option>
+                <option value="캠페인">🚀 캠페인</option>
+                <option value="트렌드">📈 트렌드</option>
+                <option value="가이드">📐 가이드</option>
+                <option value="기타">📁 기타</option>
+              </select>
+            </div>
+            <input id="wikiTags" class="inp" placeholder="태그 (쉼표 구분, 예: 양양, 서핑, 로컬)" style="margin-bottom:10px">
+
+            <div class="wiki-editor-row">
+              <textarea id="wikiBody" class="ta" placeholder="# 제목&#10;&#10;## 핵심 요약&#10;- 항목 1&#10;- 항목 2&#10;&#10;## 상세&#10;...&#10;&#10;## 관련&#10;[[다른 페이지 제목]] (위키 내부 링크)" oninput="onWikiBodyInput()"></textarea>
+              <div id="wikiPreview" class="wiki-preview"></div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <button class="tool-btn primary" onclick="saveWikiPage()">💾 저장 (Ctrl+S)</button>
+              <button class="tool-btn" onclick="aiExpandPage()">✨ AI로 확장</button>
+              <button class="tool-btn" onclick="aiSummarizePage()">📝 AI 요약 갱신</button>
+              <button class="tool-btn" onclick="deleteCurrentPage()" style="color:var(--red)">🗑 삭제</button>
+              <span id="wikiStatus" style="font-size:0.72rem;color:var(--muted2);margin-left:auto;align-self:center"></span>
+            </div>
+
+            <div id="wikiBacklinks" style="margin-top:18px"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Wiki 모달 (Ingest / Query / Lint) -->
+    <div class="modal-overlay" id="wikiModal">
+      <div class="modal" style="max-width:720px;max-height:80vh;overflow-y:auto">
+        <div class="modal-title" id="wikiModalTitle">📥 인제스트</div>
+        <div class="modal-desc" id="wikiModalDesc"></div>
+        <div id="wikiModalBody"></div>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeWikiModal()">닫기</button>
+          <button class="btn-confirm" id="wikiModalAction" onclick="">실행</button>
+        </div>
+      </div>
+    </div>
+
 
 <div class="modal-overlay" id="apiModal">
   <div class="modal">
@@ -1046,7 +1631,11 @@ function switchPage(page, btn) {
     detail: '<strong>상세페이지 생성</strong>',
     script: '<strong>영상 대본 생성</strong>',
     image: '<strong>AI 이미지 생성</strong>',
+    tts: '<strong>AI 음성 합성 · TTS</strong>',
+    video: '<strong>숏폼 영상 메이커</strong>',
+    wiki: '<strong>마케팅 지식 위키 <span style="font-weight:400;color:var(--muted2);font-size:0.78rem">· LLM Wiki 패턴</span></strong>',
   };
+  if (page === 'wiki') setTimeout(initWiki, 50);
   document.getElementById('topbarTitle').innerHTML = titles[page] || '';
 
   if (page === 'history') {
@@ -1830,6 +2419,1794 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   🎙 TTS (음성 합성)
+   ═══════════════════════════════════════════════════════════ */
+let ttsEngine = 'neural';
+let ttsLastBlob = null;          // 다운로드용 오디오 Blob (없으면 SpeechSynthesis 직접 재생)
+let ttsLastBlobUrl = null;
+let ttsLastEngine = null;
+const ttsEngineKeyStorage = {
+  openai: 'flowai_openai_key',
+  elevenlabs: 'flowai_elevenlabs_key'
+};
+
+const ELEVENLABS_VOICES = [
+  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah · 차분한 여성' },
+  { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte · 따뜻한 여성' },
+  { id: 'ErXwobaYiN019PkySvjV', name: 'Antoni · 신뢰감 있는 남성' },
+  { id: 'TxGEqnHWrfWFTfGW9XjX', name: 'Josh · 밝은 남성' },
+  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam · 깊은 남성' },
+];
+const OPENAI_VOICES = ['alloy','echo','fable','onyx','nova','shimmer','coral','sage'];
+const PUTER_VOICES = [
+  { id: 'Seoyeon', name: 'Seoyeon · 한국어 여성' },
+  { id: 'Joanna',  name: 'Joanna · 영어(US) 여성' },
+  { id: 'Matthew', name: 'Matthew · 영어(US) 남성' },
+  { id: 'Amy',     name: 'Amy · 영어(UK) 여성' },
+  { id: 'Brian',   name: 'Brian · 영어(UK) 남성' },
+  { id: 'Takumi',  name: 'Takumi · 일본어 남성' },
+  { id: 'Mizuki',  name: 'Mizuki · 일본어 여성' },
+];
+
+function selectTtsEngine(el, engine) {
+  ttsEngine = engine;
+  document.querySelectorAll('.tts-engine').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  populateTtsVoices();
+  updateTtsKeyField();
+}
+
+function updateTtsKeyField() {
+  const wrap = document.getElementById('ttsApiKeyField');
+  const label = document.getElementById('ttsApiKeyLabel');
+  const hint = document.getElementById('ttsApiKeyHint');
+  const input = document.getElementById('ttsApiKey');
+  if (ttsEngine === 'openai' || ttsEngine === 'elevenlabs') {
+    wrap.style.display = '';
+    if (ttsEngine === 'openai') {
+      label.textContent = 'OpenAI API 키';
+      input.placeholder = 'sk-...';
+      hint.innerHTML = 'platform.openai.com → API keys. tts-1-hd 모델, ~$15/1M자. 키는 브라우저 로컬에만 저장됩니다.';
+    } else {
+      label.textContent = 'ElevenLabs API 키';
+      input.placeholder = 'sk_...';
+      hint.innerHTML = 'elevenlabs.io → Profile → API Key. 무료 티어 월 10,000자. 키는 브라우저 로컬에만 저장됩니다.';
+    }
+    const saved = localStorage.getItem(ttsEngineKeyStorage[ttsEngine]) || '';
+    input.value = saved;
+    input.oninput = () => localStorage.setItem(ttsEngineKeyStorage[ttsEngine], input.value);
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function populateTtsVoices() {
+  const sel = document.getElementById('ttsVoice');
+  const hint = document.getElementById('ttsVoiceHint');
+  sel.innerHTML = '';
+  if (ttsEngine === 'neural') {
+    const voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []) || [];
+    // 우선순위: Korean Neural > Korean > Neural others > others
+    const score = v => {
+      const n = (v.name || '').toLowerCase();
+      let s = 0;
+      if ((v.lang || '').toLowerCase().startsWith('ko')) s += 100;
+      if (n.includes('natural') || n.includes('neural') || n.includes('online')) s += 30;
+      if (n.includes('multilingual')) s += 5;
+      return s;
+    };
+    const sorted = voices.slice().sort((a,b) => score(b) - score(a));
+    if (!sorted.length) {
+      sel.innerHTML = '<option value="">브라우저 보이스를 불러오는 중... ↻ 버튼을 눌러주세요</option>';
+      hint.innerHTML = '⚠ Microsoft Edge 또는 최신 Chrome에서 한국어 Neural 보이스가 가장 자연스럽습니다.';
+      return;
+    }
+    sorted.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.voiceURI;
+      const lang = v.lang || '';
+      const tag = (v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural')) ? ' ✨' : '';
+      opt.textContent = `${v.name} (${lang})${tag}`;
+      sel.appendChild(opt);
+    });
+    hint.innerHTML = '✨ 표시는 Neural/Natural 보이스. 한국어는 SunHi · InJoon · Hyunsu 등이 권장됩니다.';
+  } else if (ttsEngine === 'puter') {
+    PUTER_VOICES.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id; opt.textContent = v.name;
+      if (v.id === 'Seoyeon') opt.selected = true;
+      sel.appendChild(opt);
+    });
+    hint.innerHTML = 'Puter는 Amazon Polly Neural 기반. Seoyeon이 한국어 기본 보이스입니다.';
+  } else if (ttsEngine === 'openai') {
+    OPENAI_VOICES.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+    sel.value = 'nova';
+    hint.innerHTML = 'OpenAI tts-1-hd는 한국어를 자연스럽게 처리합니다. nova / shimmer / coral 추천.';
+  } else if (ttsEngine === 'elevenlabs') {
+    ELEVENLABS_VOICES.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id; opt.textContent = v.name;
+      sel.appendChild(opt);
+    });
+    hint.innerHTML = 'eleven_multilingual_v2 모델로 한국어 지원. 보이스 클로닝은 ElevenLabs 사이트에서.';
+  }
+}
+
+function refreshNeuralVoices() {
+  if (window.speechSynthesis) speechSynthesis.getVoices();
+  setTimeout(populateTtsVoices, 200);
+  showToast('↻ 보이스 목록 새로고침');
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = () => { if (ttsEngine === 'neural') populateTtsVoices(); };
+}
+
+function updateTtsCharCount() {
+  const text = document.getElementById('ttsText').value;
+  const chars = text.length;
+  const sec = Math.round(chars / 5); // 한국어 약 5자/초
+  document.getElementById('ttsCharCount').textContent = `${chars}자 · 약 ${sec}초`;
+}
+
+function insertSSMLBreak(time) {
+  const ta = document.getElementById('ttsText');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const tag = `<break time="${time}"/>`;
+  ta.value = ta.value.slice(0, start) + tag + ta.value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + tag.length;
+  ta.focus();
+  updateTtsCharCount();
+}
+
+function cleanTtsText() {
+  const ta = document.getElementById('ttsText');
+  let t = ta.value;
+  // 마크다운 / 카드 브래킷 / 이모지 정리
+  t = t.replace(/\[카드\s*\d+\]/gi, '\n')
+       .replace(/\[\d+\/\d+\]/g, '')
+       .replace(/[#*_~`>]+/g, '')
+       .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+       .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+       .replace(/\n{3,}/g, '\n\n')
+       .trim();
+  ta.value = t;
+  updateTtsCharCount();
+  showToast('✨ 텍스트 정리됨');
+}
+
+async function runTts() {
+  const text = document.getElementById('ttsText').value.trim();
+  if (!text) { showToast('⚠ 읽을 텍스트를 입력하세요'); return; }
+  const btn = document.getElementById('ttsRunBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> 음성 생성 중...';
+  try {
+    const rate = parseFloat(document.getElementById('ttsRate').value);
+    const pitch = parseFloat(document.getElementById('ttsPitch').value);
+    const voice = document.getElementById('ttsVoice').value;
+    let blob = null, audioEl = null;
+    if (ttsEngine === 'neural') {
+      audioEl = await ttsViaSpeechSynthesis(text, voice, rate, pitch);
+    } else if (ttsEngine === 'puter') {
+      blob = await ttsViaPuter(text, voice);
+    } else if (ttsEngine === 'openai') {
+      blob = await ttsViaOpenAI(text, voice, rate);
+    } else if (ttsEngine === 'elevenlabs') {
+      blob = await ttsViaElevenLabs(text, voice);
+    }
+    ttsLastEngine = ttsEngine;
+    if (blob) {
+      ttsLastBlob = blob;
+      if (ttsLastBlobUrl) URL.revokeObjectURL(ttsLastBlobUrl);
+      ttsLastBlobUrl = URL.createObjectURL(blob);
+    } else {
+      ttsLastBlob = null;
+    }
+    renderTtsPlayer(audioEl);
+    showToast('✓ 음성 생성 완료');
+  } catch (e) {
+    console.error(e);
+    showToast('⚠ ' + (e.message || '음성 생성 실패'));
+  } finally {
+    btn.disabled = false; btn.innerHTML = '🎙 음성 생성';
+  }
+}
+
+function renderTtsPlayer(speechSynthAudioEl) {
+  const wrap = document.getElementById('ttsPlayerWrap');
+  document.getElementById('ttsResult').style.display = '';
+  wrap.innerHTML = '';
+  if (ttsLastBlobUrl) {
+    const a = document.createElement('audio');
+    a.controls = true; a.src = ttsLastBlobUrl; a.style.width = '100%';
+    wrap.appendChild(a);
+    document.getElementById('ttsDownloadBtn').style.display = '';
+    document.getElementById('ttsToVideoBtn').style.display = '';
+  } else if (speechSynthAudioEl) {
+    // SpeechSynthesis는 blob 없음 — 재생만 가능, 다운로드 비활성
+    wrap.appendChild(speechSynthAudioEl);
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:0.72rem;color:var(--muted2);margin-top:8px';
+    note.innerHTML = '💡 Microsoft Neural은 브라우저 내장 재생만 지원합니다. <b>MP3 다운로드 / 영상 메이커 연결</b>이 필요하면 Puter, OpenAI, ElevenLabs 엔진을 선택하세요.';
+    wrap.appendChild(note);
+    document.getElementById('ttsDownloadBtn').style.display = 'none';
+    document.getElementById('ttsToVideoBtn').style.display = 'none';
+  }
+}
+
+function ttsViaSpeechSynthesis(text, voiceURI, rate, pitch) {
+  return new Promise((resolve, reject) => {
+    if (!window.speechSynthesis) { reject(new Error('이 브라우저는 SpeechSynthesis를 지원하지 않습니다')); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/<break[^/]*\/>/g, ', '));
+    const voices = speechSynthesis.getVoices();
+    const v = voices.find(x => x.voiceURI === voiceURI);
+    if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = rate; u.pitch = pitch;
+    u.onend = () => {};
+    u.onerror = (e) => console.warn('SpeechSynthesis error', e);
+    // 컨트롤 UI: HTMLAudioElement 흉내내는 가짜 래퍼 (재생/일시정지 버튼 제공)
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:8px;align-items:center;background:var(--s2);padding:14px;border-radius:10px;border:1px solid var(--border)';
+    const playBtn = document.createElement('button');
+    playBtn.className = 'tool-btn primary';
+    playBtn.textContent = '▶ 재생';
+    let playing = false;
+    playBtn.onclick = () => {
+      if (!playing) {
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+        playing = true;
+        playBtn.textContent = '⏸ 정지';
+      } else {
+        speechSynthesis.cancel();
+        playing = false;
+        playBtn.textContent = '▶ 재생';
+      }
+    };
+    u.onend = () => { playing = false; playBtn.textContent = '▶ 재생'; };
+    wrap.appendChild(playBtn);
+    const label = document.createElement('span');
+    label.style.cssText = 'font-size:0.78rem;color:var(--muted2)';
+    label.textContent = `${v ? v.name : '기본 보이스'} · ${text.length}자`;
+    wrap.appendChild(label);
+    resolve(wrap);
+  });
+}
+
+async function ttsViaPuter(text, voice) {
+  if (!window.puter || !puter.ai || !puter.ai.txt2speech) {
+    throw new Error('Puter SDK 로드 실패 — 페이지 새로고침 후 다시 시도');
+  }
+  // SSML break 태그 → Polly 호환 SSML 래핑
+  const hasBreak = /<break/i.test(text);
+  const payload = hasBreak ? `<speak>${text}</speak>` : text;
+  const opts = { voice, engine: 'neural' };
+  if (hasBreak) opts.ssml = true;
+  const audio = await puter.ai.txt2speech(payload, opts);
+  // audio는 HTMLAudioElement; src에서 fetch해서 blob화
+  const src = audio.src || audio.currentSrc;
+  if (!src) throw new Error('Puter 응답에 오디오 소스가 없습니다');
+  const resp = await fetch(src);
+  return await resp.blob();
+}
+
+async function ttsViaOpenAI(text, voice, rate) {
+  const key = (document.getElementById('ttsApiKey').value || '').trim();
+  if (!key) throw new Error('OpenAI API 키를 입력하세요');
+  const cleanText = text.replace(/<break[^/]*\/>/g, ', ');
+  const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'tts-1-hd',
+      voice: voice,
+      input: cleanText,
+      speed: Math.max(0.25, Math.min(4.0, rate)),
+      response_format: 'mp3'
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error('OpenAI TTS 실패: ' + (err.slice(0,120) || resp.status));
+  }
+  return await resp.blob();
+}
+
+async function ttsViaElevenLabs(text, voiceId) {
+  const key = (document.getElementById('ttsApiKey').value || '').trim();
+  if (!key) throw new Error('ElevenLabs API 키를 입력하세요');
+  const cleanText = text.replace(/<break[^/]*\/>/g, ' ... ');
+  const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+    method: 'POST',
+    headers: { 'xi-api-key': key, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+    body: JSON.stringify({
+      text: cleanText,
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.3, use_speaker_boost: true }
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error('ElevenLabs 실패: ' + (err.slice(0,120) || resp.status));
+  }
+  return await resp.blob();
+}
+
+function downloadTts() {
+  if (!ttsLastBlob) { showToast('⚠ 다운로드 가능한 음성 파일이 없습니다'); return; }
+  const ext = ttsLastBlob.type.includes('mpeg') ? 'mp3' : (ttsLastBlob.type.includes('wav') ? 'wav' : 'audio');
+  const a = document.createElement('a');
+  a.href = ttsLastBlobUrl;
+  a.download = `flowai-voice-${Date.now()}.${ext}`;
+  a.click();
+}
+
+function clearTts() {
+  document.getElementById('ttsResult').style.display = 'none';
+  document.getElementById('ttsPlayerWrap').innerHTML = '';
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  ttsLastBlob = null;
+  if (ttsLastBlobUrl) { URL.revokeObjectURL(ttsLastBlobUrl); ttsLastBlobUrl = null; }
+}
+
+function sendTtsToVideo() {
+  if (!ttsLastBlob) { showToast('⚠ 영상에 사용할 MP3가 없습니다 (Puter/OpenAI/ElevenLabs로 생성)'); return; }
+  videoState.narration = { name: `tts-${Date.now()}.mp3`, blob: ttsLastBlob, url: ttsLastBlobUrl };
+  showToast('✓ 영상 메이커에 음성 연결됨');
+  switchPage('video', document.querySelectorAll('.nav-item')[ getNavIndex('video') ]);
+  document.getElementById('vidNarrationName').textContent = videoState.narration.name;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🔗 cross-page integrations
+   ═══════════════════════════════════════════════════════════ */
+function getNavIndex(pageKey) {
+  // 간단히 onclick 문자열 매칭
+  const items = document.querySelectorAll('.nav-item');
+  for (let i = 0; i < items.length; i++) {
+    if ((items[i].getAttribute('onclick') || '').includes(`'${pageKey}'`)) return i;
+  }
+  return 0;
+}
+
+function sendCardsToTTS() {
+  const items = document.querySelectorAll('#cardGrid .card-item');
+  if (!items.length) { showToast('⚠ 카드뉴스 결과가 없습니다'); return; }
+  const text = Array.from(items).map(el => {
+    const h = el.querySelector('.card-head').textContent.trim();
+    const b = el.querySelector('.card-body').textContent.trim();
+    return [h, b].filter(Boolean).join('. ');
+  }).join('\n\n');
+  document.getElementById('ttsText').value = text;
+  updateTtsCharCount();
+  switchPage('tts', document.querySelectorAll('.nav-item')[ getNavIndex('tts') ]);
+}
+
+function sendCardsToVideo() {
+  const items = document.querySelectorAll('#cardGrid .card-item');
+  if (!items.length) { showToast('⚠ 카드뉴스 결과가 없습니다'); return; }
+  videoState.slides = Array.from(items).map(el => ({
+    title: el.querySelector('.card-head').textContent.trim(),
+    body: el.querySelector('.card-body').textContent.trim(),
+    image: null,
+    imageUrl: null,
+  }));
+  switchPage('video', document.querySelectorAll('.nav-item')[ getNavIndex('video') ]);
+  renderVideoSlides();
+  showToast(`✓ ${videoState.slides.length}장 슬라이드 생성됨`);
+}
+
+function sendScriptToTTS() {
+  const text = (currentOutput || '').trim();
+  if (!text) { showToast('⚠ 먼저 영상 대본을 생성하세요'); return; }
+  document.getElementById('ttsText').value = text;
+  updateTtsCharCount();
+  cleanTtsText();
+  switchPage('tts', document.querySelectorAll('.nav-item')[ getNavIndex('tts') ]);
+}
+
+function sendScriptToVideo() {
+  const text = (currentOutput || '').trim();
+  if (!text) { showToast('⚠ 먼저 영상 대본을 생성하세요'); return; }
+  // 씬 단위 파싱: [씬 N] / [N초] / 빈줄 기반
+  const scenes = parseScriptToScenes(text);
+  videoState.slides = scenes.map(s => ({
+    title: s.title || '',
+    body: s.body || '',
+    image: null,
+    imageUrl: null,
+  }));
+  switchPage('video', document.querySelectorAll('.nav-item')[ getNavIndex('video') ]);
+  renderVideoSlides();
+  showToast(`✓ ${videoState.slides.length}장 슬라이드 생성됨`);
+}
+
+function parseScriptToScenes(raw) {
+  // [씬 N], [장면 N], [N/M], [N초~M초], 또는 두 줄 띄움 단위
+  const blockRe = /\[(?:씬|장면|scene|씬\s*\d+|\d+[~\-]\d+초|\d+\/\d+)[^\]]*\]/gi;
+  if (blockRe.test(raw)) {
+    const parts = raw.split(blockRe).map(s => s.trim()).filter(Boolean);
+    return parts.map((p, i) => {
+      const lines = p.split('\n').filter(l => l.trim());
+      return { title: `씬 ${i+1}`, body: lines.join(' ').slice(0, 180) };
+    });
+  }
+  return raw.split(/\n{2,}/).map(s => s.trim()).filter(Boolean).map((p,i) => ({
+    title: `씬 ${i+1}`,
+    body: p.slice(0, 180)
+  }));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🎥 영상 메이커
+   ═══════════════════════════════════════════════════════════ */
+const videoState = {
+  ratio: '9:16',
+  slides: [],
+  bgm: null,           // { name, blob, url, volume }
+  narration: null,     // { name, blob, url }
+  rendered: null,      // { blob, url, ext }
+  previewing: false,
+  previewAbort: null,
+};
+
+const RATIO_DIM = {
+  '9:16': { w: 720,  h: 1280 },
+  '1:1':  { w: 1080, h: 1080 },
+  '16:9': { w: 1280, h: 720  },
+};
+
+function selectVideoRatio(el, ratio) {
+  videoState.ratio = ratio;
+  document.querySelectorAll('[id^="vid-ratio-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const dim = RATIO_DIM[ratio];
+  const c = document.getElementById('vidCanvas');
+  c.width = dim.w; c.height = dim.h;
+  drawPreviewFrame(0, 0); // 첫 프레임 다시
+}
+
+function addVideoSlide() {
+  videoState.slides.push({ title: '', body: '', image: null, imageUrl: null });
+  renderVideoSlides();
+}
+
+function clearVideoSlides() {
+  videoState.slides = [];
+  renderVideoSlides();
+}
+
+function importFromCardNews() {
+  sendCardsToVideo();
+}
+
+function importFromScript() {
+  sendScriptToVideo();
+}
+
+let vidSortable = null;
+function renderVideoSlides() {
+  const list = document.getElementById('vidSlideList');
+  list.innerHTML = '';
+  videoState.slides.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'vid-slide';
+    el.dataset.index = i;
+    const thumbStyle = s.imageUrl ? `background-image:url('${s.imageUrl}')` : '';
+    el.innerHTML = `
+      <span class="vid-slide-handle" title="드래그">⋮⋮</span>
+      <label class="vid-slide-thumb" style="${thumbStyle}">
+        ${!s.imageUrl ? '🖼' : ''}
+        <div class="vid-slide-thumb-overlay">이미지 변경</div>
+        <input type="file" accept="image/*" onchange="onSlideImage(${i}, this)">
+      </label>
+      <div class="vid-slide-fields">
+        <input type="text" placeholder="제목 (헤드라인)" value="${esc(s.title || '')}" onchange="onSlideField(${i},'title',this.value)">
+        <textarea rows="2" placeholder="본문 (자막에 사용)" onchange="onSlideField(${i},'body',this.value)">${esc(s.body || '')}</textarea>
+      </div>
+      <div class="vid-slide-actions">
+        <button class="gen" onclick="generateSlideImage(${i})" title="AI 이미지 생성">🎨 AI</button>
+        <button onclick="removeSlide(${i})" title="삭제">✕</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+  // 카운트 / 길이 추정
+  const dur = parseFloat(document.getElementById('vidSlideDuration').value) || 3.5;
+  document.getElementById('vidSlideCount').textContent = videoState.slides.length;
+  document.getElementById('vidTotalDuration').textContent = (videoState.slides.length * dur).toFixed(1);
+  // 정렬
+  if (vidSortable) vidSortable.destroy();
+  if (window.Sortable) {
+    vidSortable = Sortable.create(list, {
+      animation: 200,
+      handle: '.vid-slide-handle',
+      ghostClass: 'sortable-ghost',
+      onEnd: (evt) => {
+        const moved = videoState.slides.splice(evt.oldIndex, 1)[0];
+        videoState.slides.splice(evt.newIndex, 0, moved);
+        renderVideoSlides();
+      }
+    });
+  }
+  drawPreviewFrame(0, 0);
+}
+
+function onSlideField(idx, key, val) {
+  if (videoState.slides[idx]) { videoState.slides[idx][key] = val; drawPreviewFrame(idx, 0); }
+}
+
+function onSlideImage(idx, input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  videoState.slides[idx].image = f;
+  videoState.slides[idx].imageUrl = url;
+  renderVideoSlides();
+}
+
+function removeSlide(idx) {
+  videoState.slides.splice(idx, 1);
+  renderVideoSlides();
+}
+
+async function generateSlideImage(idx) {
+  const s = videoState.slides[idx];
+  const prompt = (s.title + ' ' + s.body).trim();
+  if (!prompt) { showToast('⚠ 제목/본문을 먼저 입력하세요'); return; }
+  if (!window.puter || !puter.ai || !puter.ai.txt2img) { showToast('⚠ Puter SDK 미로드'); return; }
+  showToast('🎨 이미지 생성 중...');
+  try {
+    const dim = RATIO_DIM[videoState.ratio];
+    const img = await puter.ai.txt2img(prompt + ', cinematic, high quality', {
+      model: 'flux-schnell',
+      width: dim.w, height: dim.h, testMode: false
+    });
+    s.imageUrl = img.src;
+    s.image = null; // 외부 URL
+    renderVideoSlides();
+    showToast('✓ 이미지 생성 완료');
+  } catch(e) {
+    showToast('⚠ 이미지 생성 실패: ' + (e.message || ''));
+  }
+}
+
+function onBgmFile(input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  if (videoState.bgm && videoState.bgm.url) URL.revokeObjectURL(videoState.bgm.url);
+  videoState.bgm = { name: f.name, blob: f, url: URL.createObjectURL(f) };
+  document.getElementById('vidBgmName').textContent = f.name;
+}
+
+function onNarrationFile(input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  if (videoState.narration && videoState.narration.url) URL.revokeObjectURL(videoState.narration.url);
+  videoState.narration = { name: f.name, blob: f, url: URL.createObjectURL(f) };
+  document.getElementById('vidNarrationName').textContent = f.name;
+}
+
+function attachLatestTts() {
+  if (!ttsLastBlob) { showToast('⚠ TTS 페이지에서 음성을 먼저 생성하세요 (Puter/OpenAI/ElevenLabs)'); return; }
+  videoState.narration = { name: `tts-${Date.now()}.mp3`, blob: ttsLastBlob, url: ttsLastBlobUrl };
+  document.getElementById('vidNarrationName').textContent = videoState.narration.name;
+  showToast('✓ 최근 생성 음성 연결됨');
+}
+
+/* ── Canvas 렌더링 ── */
+const slideImgCache = new Map();
+async function loadImage(src) {
+  if (!src) return null;
+  if (slideImgCache.has(src)) return slideImgCache.get(src);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  const p = new Promise((res, rej) => {
+    img.onload = () => res(img);
+    img.onerror = () => res(null); // 실패해도 렌더 진행
+  });
+  img.src = src;
+  await p;
+  slideImgCache.set(src, img);
+  return img;
+}
+
+function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2; }
+
+function getKenBurnsTransform(slideIdx, t) {
+  const mode = document.getElementById('vidKenBurns').value;
+  const e = easeInOut(t);
+  let scale = 1, dx = 0, dy = 0;
+  let actual = mode;
+  if (mode === 'auto') {
+    const modes = ['zoom-in', 'zoom-out', 'pan-right', 'pan-left'];
+    actual = modes[slideIdx % modes.length];
+  }
+  if (actual === 'zoom-in')  { scale = 1.0 + 0.12 * e; }
+  else if (actual === 'zoom-out') { scale = 1.12 - 0.12 * e; }
+  else if (actual === 'pan-right') { scale = 1.08; dx = -0.06 + 0.12 * e; }
+  else if (actual === 'pan-left')  { scale = 1.08; dx =  0.06 - 0.12 * e; }
+  return { scale, dx, dy };
+}
+
+function drawSlideOnCanvas(ctx, slide, slideIdx, tNorm, transitionAlpha) {
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  ctx.save();
+  ctx.fillStyle = '#08090c';
+  ctx.fillRect(0, 0, W, H);
+
+  const cached = slide.imageUrl ? slideImgCache.get(slide.imageUrl) : null;
+  const { scale, dx, dy } = getKenBurnsTransform(slideIdx, tNorm);
+
+  if (cached) {
+    // contain-and-cover: cover로 채워 Ken Burns 적용
+    const ir = cached.width / cached.height;
+    const cr = W / H;
+    let dw, dh;
+    if (ir > cr) { dh = H * scale; dw = dh * ir; }
+    else        { dw = W * scale; dh = dw / ir; }
+    const ox = (W - dw)/2 + dx * W;
+    const oy = (H - dh)/2 + dy * H;
+    ctx.drawImage(cached, ox, oy, dw, dh);
+    // 어두운 그라디언트 (자막 가독성)
+    const grad = ctx.createLinearGradient(0, H*0.45, 0, H);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.65)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    // 이미지 없을 때: 그라디언트 배경
+    const colors = [
+      ['#0e1016','#1c1f2a'],
+      ['#0c2a2e','#103a48'],
+      ['#1a1124','#371445'],
+      ['#1d1208','#3a1f0d'],
+    ];
+    const c = colors[slideIdx % colors.length];
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, c[0]); grad.addColorStop(1, c[1]);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    // 시안 데코
+    ctx.fillStyle = 'rgba(0,229,200,0.08)';
+    ctx.beginPath(); ctx.arc(W*0.85, H*0.15, W*0.4, 0, Math.PI*2); ctx.fill();
+  }
+
+  // 자막 그리기
+  const style = document.getElementById('vidCaptionStyle').value;
+  if (style !== 'none') drawCaption(ctx, slide, tNorm, style);
+
+  // 트랜지션 알파(검정 페이드)
+  if (transitionAlpha > 0) {
+    ctx.fillStyle = `rgba(0,0,0,${transitionAlpha})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  ctx.restore();
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(/\s+/);
+  const lines = []; let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = w; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function drawCaption(ctx, slide, tNorm, style) {
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  const isVertical = H >= W;
+  const titleSize = isVertical ? Math.round(W * 0.075) : Math.round(W * 0.05);
+  const bodySize  = isVertical ? Math.round(W * 0.05)  : Math.round(W * 0.034);
+  const padX = W * 0.06;
+  const maxW = W - padX * 2;
+
+  // 페이드인 (앞 0.4s 비례)
+  const fadeIn = Math.min(1, tNorm * 4);
+  const alpha = fadeIn;
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  if (style === 'title') {
+    ctx.font = `700 ${titleSize}px 'Unbounded', 'DM Sans', sans-serif`;
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    const lines = wrapText(ctx, slide.title || slide.body || '', maxW);
+    let y = H * 0.42;
+    lines.forEach(l => {
+      ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 16;
+      ctx.fillText(l, padX, y);
+      y += titleSize * 1.2;
+    });
+    ctx.shadowBlur = 0;
+    return;
+  }
+
+  // modern / kinetic / subtitle: 하단 영역
+  ctx.font = `700 ${titleSize}px 'Unbounded','DM Sans',sans-serif`;
+  const titleLines = slide.title ? wrapText(ctx, slide.title, maxW) : [];
+  ctx.font = `400 ${bodySize}px 'DM Sans',sans-serif`;
+  const bodyLines  = slide.body  ? wrapText(ctx, slide.body, maxW)  : [];
+
+  const lineGap = bodySize * 1.45;
+  const titleGap = titleSize * 1.15;
+  const totalH = titleLines.length * titleGap + (titleLines.length && bodyLines.length ? lineGap*0.4 : 0) + bodyLines.length * lineGap;
+  const blockTop = H - padX - totalH;
+
+  if (style === 'modern') {
+    // 그라디언트 박스
+    const boxTop = blockTop - padX*0.5;
+    const boxH = totalH + padX;
+    const grad = ctx.createLinearGradient(0, boxTop, 0, boxTop + boxH);
+    grad.addColorStop(0, `rgba(8,9,12,${0.0 * alpha})`);
+    grad.addColorStop(1, `rgba(8,9,12,${0.85 * alpha})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, boxTop, W, boxH);
+    // 시안 액센트 라인
+    ctx.fillStyle = `rgba(0,229,200,${alpha})`;
+    ctx.fillRect(padX, blockTop - 6, bodySize*1.2, 4);
+  }
+
+  let y = blockTop + titleSize;
+  if (titleLines.length) {
+    ctx.font = `700 ${titleSize}px 'Unbounded','DM Sans',sans-serif`;
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    if (style === 'subtitle') ctx.shadowColor='rgba(0,0,0,0.8)', ctx.shadowBlur = 12;
+    titleLines.forEach(l => { ctx.fillText(l, padX, y); y += titleGap; });
+    y += lineGap*0.4;
+    ctx.shadowBlur = 0;
+  }
+  if (bodyLines.length) {
+    ctx.font = `400 ${bodySize}px 'DM Sans',sans-serif`;
+    if (style === 'kinetic') {
+      // 단어 단위 진행: tNorm에 따라 단어 강조
+      const allWords = bodyLines.join(' ').split(' ');
+      const activeIdx = Math.min(allWords.length - 1, Math.floor(tNorm * allWords.length));
+      let wi = 0;
+      bodyLines.forEach(line => {
+        let x = padX;
+        const words = line.split(' ');
+        words.forEach((w, k) => {
+          const isActive = wi === activeIdx;
+          ctx.fillStyle = isActive ? `rgba(0,229,200,${alpha})` : `rgba(240,237,230,${alpha*0.8})`;
+          if (isActive) { ctx.shadowColor='rgba(0,229,200,0.6)'; ctx.shadowBlur = 18; }
+          ctx.fillText(w + (k < words.length - 1 ? ' ' : ''), x, y);
+          x += ctx.measureText(w + ' ').width;
+          ctx.shadowBlur = 0;
+          wi++;
+        });
+        y += lineGap;
+      });
+    } else {
+      ctx.fillStyle = `rgba(240,237,230,${alpha})`;
+      if (style === 'subtitle') ctx.shadowColor='rgba(0,0,0,0.85)', ctx.shadowBlur = 14;
+      bodyLines.forEach(line => { ctx.fillText(line, padX, y); y += lineGap; });
+      ctx.shadowBlur = 0;
+    }
+  }
+}
+
+async function preloadSlideImages() {
+  const tasks = videoState.slides.map(s => s.imageUrl ? loadImage(s.imageUrl) : Promise.resolve(null));
+  await Promise.all(tasks);
+}
+
+async function drawPreviewFrame(slideIdx, tNorm) {
+  await preloadSlideImages();
+  const ctx = document.getElementById('vidCanvas').getContext('2d');
+  if (!videoState.slides.length) {
+    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    ctx.fillStyle = '#585c6e'; ctx.font = '24px DM Sans, sans-serif'; ctx.textAlign='center';
+    ctx.fillText('슬라이드를 추가하세요', ctx.canvas.width/2, ctx.canvas.height/2);
+    return;
+  }
+  drawSlideOnCanvas(ctx, videoState.slides[slideIdx] || videoState.slides[0], slideIdx, tNorm, 0);
+}
+
+async function playPreview() {
+  if (videoState.previewing) return;
+  if (!videoState.slides.length) { showToast('⚠ 슬라이드 없음'); return; }
+  await preloadSlideImages();
+  videoState.previewing = true;
+  document.getElementById('vidPlayBtn').textContent = '▶ 재생 중...';
+  const dur = parseFloat(document.getElementById('vidSlideDuration').value) || 3.5;
+  const ctx = document.getElementById('vidCanvas').getContext('2d');
+  const transition = document.getElementById('vidTransition').value;
+  const transitionDur = transition === 'cut' ? 0 : 0.3;
+  let aborted = false;
+  videoState.previewAbort = () => { aborted = true; };
+  const start = performance.now();
+  function frame(now) {
+    if (aborted) return;
+    const elapsed = (now - start) / 1000;
+    const totalDur = videoState.slides.length * dur;
+    if (elapsed >= totalDur) { stopPreview(); return; }
+    const slideIdx = Math.min(videoState.slides.length - 1, Math.floor(elapsed / dur));
+    const inSlide = elapsed - slideIdx * dur;
+    const tNorm = Math.min(1, inSlide / dur);
+    let alpha = 0;
+    if (transitionDur > 0) {
+      if (inSlide < transitionDur) alpha = 1 - (inSlide / transitionDur);
+      else if (inSlide > dur - transitionDur) alpha = (inSlide - (dur - transitionDur)) / transitionDur;
+    }
+    drawSlideOnCanvas(ctx, videoState.slides[slideIdx], slideIdx, tNorm, alpha);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function stopPreview() {
+  if (videoState.previewAbort) videoState.previewAbort();
+  videoState.previewing = false;
+  document.getElementById('vidPlayBtn').textContent = '▶ 미리보기 재생';
+}
+
+/* ── 렌더링 (MediaRecorder) ── */
+async function renderVideo(format) {
+  if (!videoState.slides.length) { showToast('⚠ 슬라이드를 추가하세요'); return; }
+  const btnW = document.getElementById('vidRenderBtn');
+  const btnM = document.getElementById('vidRenderMp4Btn');
+  btnW.disabled = true; btnM.disabled = true;
+  const targetBtn = format === 'mp4' ? btnM : btnW;
+  const originalLabel = targetBtn.innerHTML;
+  targetBtn.innerHTML = '<div class="spinner"></div> 렌더링 중...';
+  document.getElementById('vidProgress').style.display = '';
+  document.getElementById('vidResult').style.display = 'none';
+
+  try {
+    await preloadSlideImages();
+    const webmBlob = await renderToWebM((p, label) => {
+      document.getElementById('vidProgressFill').style.width = (p*100).toFixed(1) + '%';
+      if (label) document.getElementById('vidProgressLabel').textContent = label;
+    });
+    let outBlob = webmBlob, ext = 'webm';
+    if (format === 'mp4') {
+      document.getElementById('vidProgressLabel').textContent = 'MP4로 변환 중 (ffmpeg.wasm 로드, 첫 회 시간 소요)...';
+      outBlob = await convertWebmToMp4(webmBlob, (p,label) => {
+        document.getElementById('vidProgressFill').style.width = (p*100).toFixed(1) + '%';
+        if (label) document.getElementById('vidProgressLabel').textContent = label;
+      });
+      ext = 'mp4';
+    }
+    if (videoState.rendered && videoState.rendered.url) URL.revokeObjectURL(videoState.rendered.url);
+    videoState.rendered = { blob: outBlob, url: URL.createObjectURL(outBlob), ext };
+    const v = document.getElementById('vidOutput');
+    v.src = videoState.rendered.url;
+    document.getElementById('vidResult').style.display = '';
+    showToast(`✓ 영상 렌더 완료 (${ext.toUpperCase()})`);
+  } catch (e) {
+    console.error(e);
+    showToast('⚠ 렌더 실패: ' + (e.message || ''));
+  } finally {
+    btnW.disabled = false; btnM.disabled = false;
+    targetBtn.innerHTML = originalLabel;
+    document.getElementById('vidProgress').style.display = 'none';
+    document.getElementById('vidProgressFill').style.width = '0%';
+  }
+}
+
+async function renderToWebM(onProgress) {
+  const canvas = document.getElementById('vidCanvas');
+  const ctx = canvas.getContext('2d');
+  const fps = 30;
+  const dur = parseFloat(document.getElementById('vidSlideDuration').value) || 3.5;
+  const transition = document.getElementById('vidTransition').value;
+  const transitionDur = transition === 'cut' ? 0 : 0.3;
+  const totalDur = videoState.slides.length * dur;
+
+  // 캔버스 비디오 스트림
+  const stream = canvas.captureStream(fps);
+
+  // 오디오 믹싱: WebAudio로 narration + bgm 합성
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const dest = audioCtx.createMediaStreamDestination();
+  let narrationDuration = 0;
+
+  if (videoState.bgm) {
+    try {
+      const arr = await videoState.bgm.blob.arrayBuffer();
+      const buf = await audioCtx.decodeAudioData(arr.slice(0));
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const g = audioCtx.createGain();
+      const baseVol = parseFloat(document.getElementById('vidBgmVol').value) || 0.25;
+      const duck = document.getElementById('vidBgmDuck').checked;
+      g.gain.value = baseVol;
+      // 더킹: narration 있으면 narration 구간 동안 0.4× 감쇠
+      if (duck && videoState.narration) {
+        // narration 길이를 모를 수 있으므로 totalDur로 추정 (단순화)
+        g.gain.setValueAtTime(baseVol, audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(baseVol * 0.35, audioCtx.currentTime + 0.4);
+      }
+      src.connect(g); g.connect(dest);
+      src.start(0);
+    } catch(e) { console.warn('bgm decode fail', e); }
+  }
+  if (videoState.narration) {
+    try {
+      const arr = await videoState.narration.blob.arrayBuffer();
+      const buf = await audioCtx.decodeAudioData(arr.slice(0));
+      narrationDuration = buf.duration;
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      const g = audioCtx.createGain();
+      g.gain.value = 1.0;
+      src.connect(g); g.connect(dest);
+      src.start(0);
+    } catch(e) { console.warn('narration decode fail', e); }
+  }
+  // 오디오 트랙 합치기
+  const audioTrack = dest.stream.getAudioTracks()[0];
+  if (audioTrack) stream.addTrack(audioTrack);
+
+  // 실제 렌더 길이: narration이 더 길면 narration에 맞춤
+  const renderDur = Math.max(totalDur, narrationDuration || 0);
+
+  // MediaRecorder 코덱 선택 (vp9 우선, 폴백 vp8/webm)
+  const candidates = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9',
+    'video/webm',
+  ];
+  const mime = candidates.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
+  const chunks = [];
+  rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  const stopped = new Promise(r => rec.onstop = r);
+  rec.start(100);
+
+  // 프레임 루프 (실시간)
+  const start = performance.now();
+  await new Promise(resolve => {
+    function frame(now) {
+      const elapsed = (now - start) / 1000;
+      if (elapsed >= renderDur) { resolve(); return; }
+      const slideIdx = Math.min(videoState.slides.length - 1, Math.floor(elapsed / dur));
+      const inSlide = elapsed - slideIdx * dur;
+      const tNorm = Math.min(1, inSlide / dur);
+      let alpha = 0;
+      if (transitionDur > 0) {
+        if (inSlide < transitionDur && slideIdx > 0) alpha = 1 - (inSlide / transitionDur);
+        else if (inSlide > dur - transitionDur && slideIdx < videoState.slides.length - 1) alpha = (inSlide - (dur - transitionDur)) / transitionDur;
+      }
+      drawSlideOnCanvas(ctx, videoState.slides[slideIdx], slideIdx, tNorm, alpha);
+      onProgress(elapsed / renderDur, `렌더링 ${Math.round(elapsed)}/${Math.round(renderDur)}s`);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+  rec.stop();
+  await stopped;
+  audioCtx.close();
+  return new Blob(chunks, { type: mime.split(';')[0] });
+}
+
+let _ffmpegInstance = null;
+async function loadFFmpeg(onProgress) {
+  if (_ffmpegInstance) return _ffmpegInstance;
+  onProgress && onProgress(0.05, 'ffmpeg.wasm 로딩...');
+  // Single-thread 빌드 (COOP/COEP 헤더 없는 환경 호환)
+  const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+  // FFmpeg ESM 로드
+  if (!window.FFmpegLib) {
+    const mod = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+    const util = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
+    window.FFmpegLib = { FFmpeg: mod.FFmpeg, toBlobURL: util.toBlobURL, fetchFile: util.fetchFile };
+  }
+  const { FFmpeg, toBlobURL } = window.FFmpegLib;
+  const ff = new FFmpeg();
+  ff.on('progress', ({ progress }) => {
+    if (onProgress && progress >= 0 && progress <= 1) onProgress(0.5 + progress * 0.5, `MP4 인코딩 ${Math.round(progress*100)}%`);
+  });
+  await ff.load({
+    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+  });
+  _ffmpegInstance = ff;
+  return ff;
+}
+
+async function convertWebmToMp4(webmBlob, onProgress) {
+  const ff = await loadFFmpeg(onProgress);
+  const { fetchFile } = window.FFmpegLib;
+  await ff.writeFile('input.webm', await fetchFile(webmBlob));
+  onProgress && onProgress(0.5, 'MP4 인코딩 시작...');
+  await ff.exec([
+    '-i', 'input.webm',
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '23',
+    '-c:a', 'aac', '-b:a', '192k',
+    '-pix_fmt', 'yuv420p',
+    '-movflags', '+faststart',
+    'output.mp4'
+  ]);
+  const data = await ff.readFile('output.mp4');
+  return new Blob([data.buffer], { type: 'video/mp4' });
+}
+
+function downloadRenderedVideo() {
+  if (!videoState.rendered) { showToast('⚠ 렌더된 영상이 없습니다'); return; }
+  const a = document.createElement('a');
+  a.href = videoState.rendered.url;
+  a.download = `flowai-video-${Date.now()}.${videoState.rendered.ext}`;
+  a.click();
+}
+
+// 슬라이드 길이 변경 → 카운트 갱신
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'vidSlideDuration') {
+    const dur = parseFloat(e.target.value) || 3.5;
+    document.getElementById('vidTotalDuration').textContent = (videoState.slides.length * dur).toFixed(1);
+  }
+});
+document.addEventListener('change', (e) => {
+  if (e.target && (e.target.id === 'vidCaptionStyle' || e.target.id === 'vidKenBurns')) {
+    drawPreviewFrame(0, 0);
+  }
+});
+
+// 초기 로드: TTS 보이스 채우기
+window.addEventListener('load', () => {
+  setTimeout(populateTtsVoices, 300);
+  setTimeout(() => drawPreviewFrame(0, 0), 400);
+});
+
+/* ═══════════════════════════════════════════════════════════
+   📚 마케팅 지식 위키 (Karpathy LLM Wiki 패턴)
+   - 누적 지식: 콘텐츠 생성 시 자동 컨텍스트 주입
+   - Ingest: 텍스트/URL → 페이지 자동 생성·갱신 제안
+   - Query: 자연어 질문 → top-K 검색 + LLM 답변 → 페이지 저장
+   - Lint: 모순/고아/노후 페이지 검사
+   ═══════════════════════════════════════════════════════════ */
+const WIKI_KEY = 'flowai_wiki';
+const WIKI_LOG_KEY = 'flowai_wiki_log';
+let wiki = loadWiki();
+let currentWikiPageId = null;
+let wikiSaveDebounce = null;
+
+function loadWiki() {
+  try {
+    const raw = localStorage.getItem(WIKI_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e){}
+  return { pages: {}, version: 1 };
+}
+function saveWiki() {
+  try { localStorage.setItem(WIKI_KEY, JSON.stringify(wiki)); }
+  catch(e) { showToast('⚠ 저장 실패: 위키 용량이 너무 큼 (백업 후 일부 페이지 삭제 필요)'); }
+}
+function appendWikiLog(entry) {
+  const log = JSON.parse(localStorage.getItem(WIKI_LOG_KEY) || '[]');
+  log.push({ t: Date.now(), ...entry });
+  // 최근 500개만 유지
+  if (log.length > 500) log.splice(0, log.length - 500);
+  localStorage.setItem(WIKI_LOG_KEY, JSON.stringify(log));
+}
+
+function uid() { return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7); }
+
+function initWiki() {
+  renderWikiList();
+  updateWikiCtxInfo();
+  if (currentWikiPageId && wiki.pages[currentWikiPageId]) {
+    openWikiPage(currentWikiPageId);
+  }
+}
+
+function renderWikiList() {
+  const filter = (document.getElementById('wikiSearch').value || '').toLowerCase().trim();
+  const list = document.getElementById('wikiList');
+  const pages = Object.values(wiki.pages);
+  const filtered = filter
+    ? pages.filter(p =>
+        (p.title || '').toLowerCase().includes(filter) ||
+        (p.body || '').toLowerCase().includes(filter) ||
+        (p.tags || []).some(t => t.toLowerCase().includes(filter))
+      )
+    : pages;
+  filtered.sort((a,b) => (b.updated||0) - (a.updated||0));
+  // 카테고리 그룹화
+  const byCat = {};
+  filtered.forEach(p => { (byCat[p.category || '기타'] = byCat[p.category || '기타'] || []).push(p); });
+  const order = ['브랜드','경쟁사','페르소나','캠페인','트렌드','가이드','기타'];
+  list.innerHTML = '';
+  let total = 0;
+  order.forEach(cat => {
+    if (!byCat[cat]) return;
+    const h = document.createElement('div');
+    h.className = 'wiki-cat-header';
+    h.textContent = cat + ' · ' + byCat[cat].length;
+    list.appendChild(h);
+    byCat[cat].forEach(p => {
+      total++;
+      const it = document.createElement('button');
+      it.className = 'wiki-list-item' + (p.id === currentWikiPageId ? ' active' : '');
+      it.onclick = () => openWikiPage(p.id);
+      it.innerHTML = `
+        <span class="wiki-list-title">${esc(p.title || '제목 없음')}</span>
+        ${p.tags && p.tags.length ? `<span class="wiki-list-cat">${p.tags.slice(0,3).map(esc).join(', ')}</span>` : ''}
+      `;
+      list.appendChild(it);
+    });
+  });
+  document.getElementById('wikiCount').textContent = Object.keys(wiki.pages).length;
+}
+
+function newWikiPage(initial = {}) {
+  const id = uid();
+  wiki.pages[id] = {
+    id,
+    title: initial.title || '새 페이지',
+    body: initial.body || '# 새 페이지\n\n## 핵심 요약\n- \n\n## 상세\n\n\n## 관련\n[[]]\n',
+    category: initial.category || '기타',
+    tags: initial.tags || [],
+    created: Date.now(),
+    updated: Date.now(),
+  };
+  saveWiki();
+  appendWikiLog({ op: 'create', id, title: wiki.pages[id].title });
+  openWikiPage(id);
+  renderWikiList();
+}
+
+function openWikiPage(id) {
+  const p = wiki.pages[id];
+  if (!p) return;
+  currentWikiPageId = id;
+  document.getElementById('wikiEmpty').style.display = 'none';
+  document.getElementById('wikiEditor').style.display = '';
+  document.getElementById('wikiTitle').value = p.title || '';
+  document.getElementById('wikiCategory').value = p.category || '기타';
+  document.getElementById('wikiTags').value = (p.tags || []).join(', ');
+  document.getElementById('wikiBody').value = p.body || '';
+  renderWikiPreview();
+  renderBacklinks(id);
+  renderWikiList();
+  document.getElementById('wikiStatus').textContent = `최종 수정: ${new Date(p.updated || Date.now()).toLocaleString('ko-KR')}`;
+}
+
+function onWikiBodyInput() {
+  renderWikiPreview();
+  if (wikiSaveDebounce) clearTimeout(wikiSaveDebounce);
+  wikiSaveDebounce = setTimeout(saveWikiPage, 800);
+}
+
+function saveWikiPage() {
+  if (!currentWikiPageId) return;
+  const p = wiki.pages[currentWikiPageId];
+  if (!p) return;
+  p.title = document.getElementById('wikiTitle').value.trim() || '제목 없음';
+  p.category = document.getElementById('wikiCategory').value;
+  p.tags = document.getElementById('wikiTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  p.body = document.getElementById('wikiBody').value;
+  p.updated = Date.now();
+  saveWiki();
+  document.getElementById('wikiStatus').textContent = `✓ 저장됨 ${new Date().toLocaleTimeString('ko-KR')}`;
+  renderWikiList();
+  updateWikiCtxInfo();
+}
+
+function deleteCurrentPage() {
+  if (!currentWikiPageId) return;
+  const p = wiki.pages[currentWikiPageId];
+  if (!confirm(`"${p.title}" 페이지를 삭제하시겠습니까?`)) return;
+  appendWikiLog({ op: 'delete', id: currentWikiPageId, title: p.title });
+  delete wiki.pages[currentWikiPageId];
+  currentWikiPageId = null;
+  saveWiki();
+  document.getElementById('wikiEditor').style.display = 'none';
+  document.getElementById('wikiEmpty').style.display = '';
+  renderWikiList();
+  updateWikiCtxInfo();
+}
+
+function renderWikiPreview() {
+  const body = document.getElementById('wikiBody').value;
+  // [[Page Title]] 위키링크 처리
+  const titleToId = {};
+  Object.values(wiki.pages).forEach(p => titleToId[(p.title || '').toLowerCase().trim()] = p.id);
+  let html = body
+    .replace(/\[\[([^\]]+)\]\]/g, (m, t) => {
+      const targetId = titleToId[t.toLowerCase().trim()];
+      const cls = targetId ? 'wikilink' : 'wikilink dead';
+      return `<a class="${cls}" data-pageid="${targetId || ''}" onclick="navigateWikiLink(this)">${esc(t)}</a>`;
+    });
+  html = marked.parse(html);
+  const preview = document.getElementById('wikiPreview');
+  preview.innerHTML = html;
+}
+
+function navigateWikiLink(el) {
+  const id = el.dataset.pageid;
+  if (id && wiki.pages[id]) openWikiPage(id);
+  else {
+    const t = el.textContent;
+    if (confirm(`"${t}" 페이지가 없습니다. 새로 만드시겠습니까?`)) {
+      newWikiPage({ title: t });
+    }
+  }
+}
+
+function renderBacklinks(id) {
+  const p = wiki.pages[id];
+  if (!p) return;
+  const target = (p.title || '').toLowerCase().trim();
+  const back = Object.values(wiki.pages).filter(o =>
+    o.id !== id && new RegExp(`\\[\\[\\s*${target.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\s*\\]\\]`,'i').test(o.body || '')
+  );
+  const wrap = document.getElementById('wikiBacklinks');
+  if (!back.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `
+    <div class="wiki-backlinks">
+      <div class="wiki-backlinks-title">🔗 이 페이지를 참조하는 페이지 (${back.length})</div>
+      ${back.map(b => `<span class="wiki-backlink-item" onclick="openWikiPage('${b.id}')">${esc(b.title)}</span>`).join('')}
+    </div>
+  `;
+}
+
+/* ── Wiki AI: Ingest / Query / Lint / Expand / Summarize ── */
+function openWikiModal(title, desc, bodyHtml, actionLabel, actionFn) {
+  document.getElementById('wikiModalTitle').textContent = title;
+  document.getElementById('wikiModalDesc').textContent = desc;
+  document.getElementById('wikiModalBody').innerHTML = bodyHtml;
+  const btn = document.getElementById('wikiModalAction');
+  btn.textContent = actionLabel;
+  btn.onclick = actionFn;
+  document.getElementById('wikiModal').classList.add('open');
+}
+function closeWikiModal() {
+  document.getElementById('wikiModal').classList.remove('open');
+}
+
+function openWikiIngest() {
+  openWikiModal(
+    '📥 인제스트 — 텍스트에서 위키 페이지 자동 생성',
+    '경쟁사 분석, 시장 리포트, 인터뷰, URL 등을 붙여넣으면 LLM이 카테고리별로 페이지를 만들거나 기존 페이지를 갱신합니다.',
+    `<textarea class="ta" id="ingestInput" rows="10" placeholder="예시:&#10;경쟁사 카카오는 카카오톡 채널을 통한 비즈메시지 광고를 5월에 출시했고, 평균 단가는 메시지당 15원이다. 타겟은 30-40대 직장인 여성으로, 이커머스 전환율이 인스타 대비 1.8배 높다고 발표했다.&#10;&#10;또는 https://... URL을 붙여넣으세요."></textarea>
+     <div style="font-size:0.72rem;color:var(--muted2);margin-top:8px">💡 LLM이 분석 후 어떤 페이지를 만들/갱신할지 제안서를 보여드립니다. 검토 후 적용 가능.</div>`,
+    '🔄 분석 시작',
+    runWikiIngest
+  );
+}
+
+async function runWikiIngest() {
+  if (!apiKey) { showToast('⚠ API 키 필요'); return; }
+  const input = document.getElementById('ingestInput').value.trim();
+  if (!input) { showToast('⚠ 텍스트를 입력하세요'); return; }
+  const btn = document.getElementById('wikiModalAction');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> 분석 중...';
+
+  // URL이면 fetch (CORS 가능 시)
+  let content = input;
+  const urlMatch = input.match(/^https?:\/\/\S+$/);
+  if (urlMatch) {
+    try {
+      const r = await fetch(input);
+      const t = await r.text();
+      // 매우 단순 텍스트 추출
+      content = t.replace(/<script[\s\S]*?<\/script>/g, '')
+                 .replace(/<style[\s\S]*?<\/style>/g, '')
+                 .replace(/<[^>]+>/g, ' ')
+                 .replace(/\s+/g, ' ')
+                 .slice(0, 8000);
+    } catch(e) { showToast('⚠ URL 가져오기 실패: 내용을 직접 붙여넣어주세요'); btn.disabled = false; btn.textContent = '🔄 분석 시작'; return; }
+  }
+
+  // 기존 페이지 인덱스
+  const existingIndex = Object.values(wiki.pages).map(p =>
+    `- [${p.id}] (${p.category}) ${p.title} — ${(p.body||'').slice(0, 120).replace(/\n/g,' ')}...`
+  ).join('\n') || '(아직 페이지 없음)';
+
+  const system = `당신은 마케팅 지식 위키의 큐레이터입니다. 입력된 텍스트를 분석해 다음을 수행하세요:
+1. 핵심 정보(엔티티, 인사이트, 트렌드, 데이터)를 추출
+2. 기존 페이지가 있으면 갱신 제안, 없으면 신규 페이지 제안
+3. 카테고리: 브랜드/경쟁사/페르소나/캠페인/트렌드/가이드/기타
+4. 마크다운 본문을 작성 (## 핵심 요약, ## 상세, ## 관련 [[다른페이지]])
+
+반드시 아래 JSON 형식으로만 응답:
+{
+  "operations": [
+    {"op":"create","title":"...","category":"경쟁사","tags":["..."],"body":"# ...\\n## 핵심 요약\\n..."},
+    {"op":"update","id":"p_xxx","appendBody":"\\n## 추가 정보 (날짜)\\n..."}
+  ],
+  "summary": "이번 인제스트의 한 줄 요약"
+}`;
+  const user = `[기존 페이지 인덱스]\n${existingIndex}\n\n[새 입력]\n${content}`;
+
+  try {
+    const result = await callLLMOnce(system, user);
+    const json = extractJSON(result);
+    if (!json || !json.operations) throw new Error('LLM 응답 파싱 실패');
+    showIngestProposal(json);
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '🔄 분석 시작';
+  }
+}
+
+function showIngestProposal(plan) {
+  const ops = plan.operations || [];
+  const html = `
+    <div style="font-size:0.86rem;color:var(--text);margin-bottom:8px"><b>요약:</b> ${esc(plan.summary || '')}</div>
+    <div style="font-size:0.72rem;color:var(--muted2);margin-bottom:6px">${ops.length}개 작업 제안 — 체크박스로 선택 후 적용</div>
+    ${ops.map((o, i) => {
+      if (o.op === 'create') {
+        return `<div class="wiki-modal-section">
+          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+            <input type="checkbox" class="ingest-op" data-idx="${i}" checked style="margin-top:3px">
+            <div style="flex:1">
+              <div><span class="wiki-diff-add">[새 페이지]</span> <b>${esc(o.title)}</b> <span style="color:var(--muted2);font-size:0.72rem">(${esc(o.category)})</span></div>
+              <div style="color:var(--muted2);font-size:0.74rem;margin-top:4px;white-space:pre-wrap;max-height:100px;overflow-y:auto">${esc((o.body || '').slice(0, 280))}${(o.body || '').length > 280 ? '...' : ''}</div>
+            </div>
+          </label>
+        </div>`;
+      } else if (o.op === 'update') {
+        const target = wiki.pages[o.id];
+        return `<div class="wiki-modal-section">
+          <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">
+            <input type="checkbox" class="ingest-op" data-idx="${i}" checked style="margin-top:3px">
+            <div style="flex:1">
+              <div><span class="wiki-diff-update">[갱신]</span> <b>${esc(target ? target.title : o.id)}</b></div>
+              <div style="color:var(--muted2);font-size:0.74rem;margin-top:4px;white-space:pre-wrap;max-height:100px;overflow-y:auto">${esc((o.appendBody || '').slice(0, 280))}</div>
+            </div>
+          </label>
+        </div>`;
+      }
+      return '';
+    }).join('')}
+  `;
+  // 임시 저장
+  window._ingestPlan = plan;
+  document.getElementById('wikiModalBody').innerHTML = html;
+  const btn = document.getElementById('wikiModalAction');
+  btn.textContent = '✓ 선택 항목 적용';
+  btn.onclick = applyIngestPlan;
+}
+
+function applyIngestPlan() {
+  const plan = window._ingestPlan;
+  if (!plan) return;
+  const checks = document.querySelectorAll('.ingest-op:checked');
+  let applied = 0;
+  checks.forEach(c => {
+    const o = plan.operations[parseInt(c.dataset.idx)];
+    if (!o) return;
+    if (o.op === 'create') {
+      const id = uid();
+      wiki.pages[id] = {
+        id, title: o.title || '새 페이지', body: o.body || '', category: o.category || '기타',
+        tags: o.tags || [], created: Date.now(), updated: Date.now(),
+      };
+      appendWikiLog({ op: 'ingest-create', id, title: o.title });
+      applied++;
+    } else if (o.op === 'update' && wiki.pages[o.id]) {
+      wiki.pages[o.id].body = (wiki.pages[o.id].body || '') + '\n\n' + (o.appendBody || '');
+      wiki.pages[o.id].updated = Date.now();
+      appendWikiLog({ op: 'ingest-update', id: o.id, title: wiki.pages[o.id].title });
+      applied++;
+    }
+  });
+  saveWiki();
+  closeWikiModal();
+  renderWikiList();
+  updateWikiCtxInfo();
+  showToast(`✓ ${applied}개 적용됨`);
+}
+
+function openWikiQuery() {
+  openWikiModal(
+    '❓ 쿼리 — 위키에 질문하기',
+    '자연어로 질문하면 관련 페이지를 찾아 답변합니다. 답변을 새 페이지로 저장 가능.',
+    `<input class="inp" id="queryInput" placeholder="예: 카카오 비즈메시지 단가는?  /  3040 여성 페르소나의 SNS 행동 패턴은?">
+     <div id="queryResult" style="margin-top:14px"></div>`,
+    '🔍 답변 받기',
+    runWikiQuery
+  );
+  setTimeout(() => document.getElementById('queryInput').focus(), 100);
+}
+
+async function runWikiQuery() {
+  if (!apiKey) { showToast('⚠ API 키 필요'); return; }
+  const q = document.getElementById('queryInput').value.trim();
+  if (!q) { showToast('⚠ 질문을 입력하세요'); return; }
+  const btn = document.getElementById('wikiModalAction');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> 검색·답변 중...';
+  const top = searchWiki(q, 6);
+  const ctx = top.map(p => `### ${p.title} (${p.category})\n${(p.body || '').slice(0, 1200)}`).join('\n\n---\n\n') || '(관련 페이지 없음)';
+  const system = `당신은 마케팅 지식 위키의 어시스턴트입니다. 아래 위키 페이지를 근거로 사용자 질문에 답하세요. 추측하지 말고, 위키에 없는 내용은 "위키에 정보 없음"이라고 표시하세요. 답변은 한국어 마크다운으로.`;
+  const user = `[질문]\n${q}\n\n[관련 위키 페이지]\n${ctx}`;
+
+  try {
+    const ans = await callLLMOnce(system, user);
+    document.getElementById('queryResult').innerHTML = `
+      <div class="wiki-modal-section">
+        <div style="font-size:0.72rem;color:var(--muted2);margin-bottom:6px">참조: ${top.map(p=>esc(p.title)).join(', ') || '없음'}</div>
+        <div style="white-space:pre-wrap;line-height:1.6">${esc(ans)}</div>
+      </div>
+    `;
+    window._lastQuery = { q, ans, refs: top.map(p => p.title) };
+    btn.disabled = false;
+    btn.textContent = '💾 답변을 새 페이지로 저장';
+    btn.onclick = saveQueryAsPage;
+  } catch(e) {
+    showToast('⚠ ' + e.message);
+    btn.disabled = false; btn.textContent = '🔍 답변 받기';
+  }
+}
+
+function saveQueryAsPage() {
+  const q = window._lastQuery;
+  if (!q) return;
+  const body = `# ${q.q}\n\n## 답변\n${q.ans}\n\n## 참조\n${q.refs.map(t => `[[${t}]]`).join(' · ')}\n\n*${new Date().toLocaleString('ko-KR')} 쿼리 결과*`;
+  newWikiPage({ title: 'Q: ' + q.q.slice(0, 60), body, category: '가이드', tags: ['쿼리'] });
+  closeWikiModal();
+}
+
+function searchWiki(query, k = 5) {
+  const tokens = query.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+  if (!tokens.length) return [];
+  const scored = Object.values(wiki.pages).map(p => {
+    const text = `${p.title} ${(p.tags || []).join(' ')} ${p.body}`.toLowerCase();
+    let score = 0;
+    tokens.forEach(t => {
+      const titleHits = ((p.title || '').toLowerCase().match(new RegExp(t, 'g')) || []).length;
+      const bodyHits = (text.match(new RegExp(t, 'g')) || []).length;
+      score += titleHits * 5 + bodyHits;
+    });
+    return { p, score };
+  }).filter(x => x.score > 0).sort((a,b) => b.score - a.score);
+  return scored.slice(0, k).map(x => x.p);
+}
+
+async function runWikiLint() {
+  if (!apiKey) { showToast('⚠ API 키 필요'); return; }
+  const pages = Object.values(wiki.pages);
+  if (!pages.length) { showToast('⚠ 위키가 비어있습니다'); return; }
+  openWikiModal('🔍 린트', '위키 전체를 검사 중입니다...', '<div class="spinner"></div> 분석 중...', '닫기', closeWikiModal);
+
+  // 오프라인 검사
+  const findings = [];
+  // 고아 페이지 (백링크 0)
+  pages.forEach(p => {
+    const back = pages.filter(o => o.id !== p.id && new RegExp(`\\[\\[\\s*${(p.title||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\s*\\]\\]`,'i').test(o.body || ''));
+    const out = ((p.body || '').match(/\[\[([^\]]+)\]\]/g) || []).length;
+    if (back.length === 0 && out === 0) findings.push({ type: 'orphan', page: p, msg: '백링크/아웃링크가 모두 없음' });
+  });
+  // 노후 (90일 이상 미수정)
+  const NOW = Date.now();
+  pages.forEach(p => {
+    const days = (NOW - (p.updated || 0)) / (1000*60*60*24);
+    if (days > 90) findings.push({ type: 'stale', page: p, msg: `${Math.round(days)}일 미수정` });
+  });
+  // 죽은 링크
+  const titles = new Set(pages.map(p => (p.title || '').toLowerCase().trim()));
+  pages.forEach(p => {
+    const links = ((p.body || '').match(/\[\[([^\]]+)\]\]/g) || []).map(m => m.slice(2,-2).toLowerCase().trim()).filter(Boolean);
+    links.forEach(l => {
+      if (!titles.has(l)) findings.push({ type: 'dead', page: p, msg: `죽은 링크: [[${l}]]` });
+    });
+  });
+
+  // LLM 모순 검사 (페이지 ≤ 20장일 때만 비용/시간 고려)
+  let contradictions = [];
+  if (pages.length <= 20) {
+    try {
+      const ctx = pages.map(p => `### ${p.title}\n${(p.body || '').slice(0, 800)}`).join('\n\n');
+      const sys = `당신은 위키 큐레이터입니다. 아래 페이지들 사이에 사실적 모순(서로 다른 수치, 상충하는 주장, 오래된 정보)이 있다면 찾아내세요. 반드시 JSON 형식: {"contradictions":[{"pages":["A","B"],"issue":"..."}]}`;
+      const r = await callLLMOnce(sys, ctx);
+      const j = extractJSON(r);
+      if (j && Array.isArray(j.contradictions)) contradictions = j.contradictions;
+    } catch(e) {}
+  }
+
+  let html = `<div style="font-size:0.86rem;margin-bottom:10px"><b>총 ${findings.length}건 + 모순 ${contradictions.length}건</b> 발견</div>`;
+  if (contradictions.length) {
+    html += `<div style="font-size:0.74rem;color:var(--muted2);margin:10px 0 6px">⚠ 사실적 모순 (LLM 분석)</div>`;
+    contradictions.forEach(c => {
+      html += `<div class="wiki-modal-section"><b style="color:var(--red)">⚠ 모순</b> ${esc((c.pages||[]).join(' ↔ '))}<div style="font-size:0.78rem;color:var(--muted2);margin-top:4px">${esc(c.issue)}</div></div>`;
+    });
+  }
+  if (findings.length) {
+    html += `<div style="font-size:0.74rem;color:var(--muted2);margin:10px 0 6px">📋 정형 검사</div>`;
+    findings.slice(0, 30).forEach(f => {
+      const icon = { orphan:'🏝', stale:'⏰', dead:'🔗' }[f.type];
+      html += `<div class="wiki-modal-section">
+        <div>${icon} <b>${esc(f.page.title)}</b> <span style="color:var(--muted2);font-size:0.72rem">— ${esc(f.msg)}</span></div>
+        <button class="tool-btn" style="margin-top:6px;font-size:0.72rem" onclick="closeWikiModal();openWikiPage('${f.page.id}')">열기</button>
+      </div>`;
+    });
+  }
+  if (!findings.length && !contradictions.length) html = '<div style="text-align:center;padding:30px;color:#4ade80">✓ 모든 페이지가 건강합니다.</div>';
+  document.getElementById('wikiModalBody').innerHTML = html;
+}
+
+async function aiExpandPage() {
+  if (!apiKey) { showToast('⚠ API 키 필요'); return; }
+  if (!currentWikiPageId) return;
+  const p = wiki.pages[currentWikiPageId];
+  showToast('✨ AI 확장 중...');
+  const sys = `당신은 마케팅 지식 위키 작성자입니다. 아래 페이지의 빈 섹션을 채우거나 부족한 내용을 보완해 더 완성도 있는 마크다운 페이지로 만드세요. 추측은 [추정] 표시.`;
+  const user = `[현재 페이지: ${p.title} / ${p.category}]\n\n${p.body}`;
+  try {
+    const expanded = await callLLMOnce(sys, user);
+    document.getElementById('wikiBody').value = expanded.trim();
+    saveWikiPage();
+    renderWikiPreview();
+    showToast('✓ 페이지 확장 완료');
+  } catch(e) { showToast('⚠ ' + e.message); }
+}
+
+async function aiSummarizePage() {
+  if (!apiKey) { showToast('⚠ API 키 필요'); return; }
+  if (!currentWikiPageId) return;
+  const p = wiki.pages[currentWikiPageId];
+  showToast('📝 요약 갱신 중...');
+  const sys = `다음 페이지의 ## 핵심 요약 섹션을 5줄 bullet로 갱신하세요. 다른 섹션은 보존. 결과는 전체 마크다운만 반환.`;
+  try {
+    const r = await callLLMOnce(sys, p.body);
+    document.getElementById('wikiBody').value = r.trim();
+    saveWikiPage();
+    renderWikiPreview();
+    showToast('✓ 요약 갱신 완료');
+  } catch(e) { showToast('⚠ ' + e.message); }
+}
+
+function exportWiki() {
+  const blob = new Blob([JSON.stringify(wiki, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `flowai-wiki-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showToast('⬇ 백업 다운로드');
+}
+
+function importWiki(input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!data.pages) throw new Error('형식 오류');
+      if (confirm('현재 위키와 병합하시겠습니까? (취소 = 덮어쓰기)')) {
+        Object.assign(wiki.pages, data.pages);
+      } else {
+        wiki = data;
+      }
+      saveWiki();
+      renderWikiList();
+      updateWikiCtxInfo();
+      showToast('✓ 복원 완료');
+    } catch(e) { showToast('⚠ ' + e.message); }
+  };
+  r.readAsText(f);
+  input.value = '';
+}
+
+function clearWiki() {
+  wiki = { pages: {}, version: 1 };
+  saveWiki();
+  currentWikiPageId = null;
+  document.getElementById('wikiEditor').style.display = 'none';
+  document.getElementById('wikiEmpty').style.display = '';
+  renderWikiList();
+  updateWikiCtxInfo();
+  showToast('✓ 전체 삭제됨');
+}
+
+function updateWikiCtxInfo() {
+  const el = document.getElementById('wikiCtxInfo');
+  if (el) el.textContent = `(${Object.keys(wiki.pages).length}개 페이지 활성)`;
+}
+
+/* Ctrl+S to save in wiki */
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's' && currentPage === 'wiki' && currentWikiPageId) {
+    e.preventDefault(); saveWikiPage(); showToast('✓ 저장됨');
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   ✨ 자동 개선 루프 (Karpathy autoresearch 패턴)
+   - LLM 판정자가 점수 매김 → 비평 → 개선 → N회 반복
+   - 모든 시도를 flowai_experiments에 기록 (few-shot 재활용용)
+   ═══════════════════════════════════════════════════════════ */
+const EXP_KEY = 'flowai_experiments';
+
+async function runAutoRefine(N = 3) {
+  if (!apiKey) { openApiModal(); return; }
+  const original = (currentOutput || '').trim();
+  if (!original) { showToast('⚠ 먼저 콘텐츠를 생성하세요'); return; }
+  const type = document.getElementById('contentType').value;
+  const topic = document.getElementById('userTopic').value;
+
+  const refineWrap = document.createElement('div');
+  refineWrap.id = 'refineWrap';
+  refineWrap.style.cssText = 'margin-top:14px;padding:14px;background:var(--s2);border:1px solid var(--cyan-border);border-radius:10px';
+  refineWrap.innerHTML = `<div style="font-size:0.86rem;color:var(--cyan);font-weight:600;margin-bottom:10px">✨ 자동 개선 루프 (${N}회)</div><div id="refineIters"></div>`;
+  const oldRefine = document.getElementById('refineWrap');
+  if (oldRefine) oldRefine.remove();
+  document.getElementById('outputArea').appendChild(refineWrap);
+  document.getElementById('outputArea').classList.add('has-content');
+
+  const iters = [];
+  const judgeBaseline = await judgeContent(original, type, topic);
+  iters.push({ iter: 0, content: original, ...judgeBaseline });
+  renderRefineIters(iters);
+
+  let current = original;
+  for (let i = 1; i <= N; i++) {
+    addRefineStatus(`개선 ${i}/${N} — 비평 + 재생성 중...`);
+    try {
+      const judgement = iters[iters.length - 1];
+      const revised = await reviseContent(current, type, topic, judgement.critique);
+      const j = await judgeContent(revised, type, topic);
+      iters.push({ iter: i, content: revised, ...j });
+      current = revised;
+      renderRefineIters(iters);
+    } catch(e) {
+      addRefineStatus('⚠ 개선 실패: ' + e.message);
+      break;
+    }
+  }
+
+  // 최고점 적용
+  const best = iters.slice().sort((a,b) => b.total - a.total)[0];
+  if (best.iter > 0) {
+    currentOutput = best.content;
+    document.getElementById('outputArea').firstChild && (document.getElementById('outputArea').firstChild.textContent = best.content);
+    // outputArea 텍스트 노드 다시 그리기
+    const area = document.getElementById('outputArea');
+    [...area.childNodes].forEach(n => { if (n.id !== 'refineWrap') n.remove(); });
+    const div = document.createElement('div');
+    div.style.whiteSpace = 'pre-wrap';
+    div.textContent = best.content;
+    area.insertBefore(div, refineWrap);
+    updateAllViews(best.content);
+  }
+
+  // 실험 로그
+  const log = JSON.parse(localStorage.getItem(EXP_KEY) || '[]');
+  log.push({ t: Date.now(), type, topic, iters: iters.map(x => ({ iter: x.iter, total: x.total, scores: x.scores })) });
+  if (log.length > 200) log.splice(0, log.length - 200);
+  localStorage.setItem(EXP_KEY, JSON.stringify(log));
+
+  showToast(`✓ 자동 개선 완료 — 최고점 ${best.total}/50 (반복 ${best.iter})`);
+}
+
+function addRefineStatus(msg) {
+  const list = document.getElementById('refineIters');
+  if (!list) return;
+  const s = document.createElement('div');
+  s.style.cssText = 'font-size:0.74rem;color:var(--muted2);padding:6px 0';
+  s.innerHTML = `<div class="spinner" style="display:inline-block;vertical-align:middle"></div> ${msg}`;
+  list.appendChild(s);
+}
+
+function renderRefineIters(iters) {
+  const list = document.getElementById('refineIters');
+  if (!list) return;
+  const bestTotal = Math.max(...iters.map(x => x.total));
+  list.innerHTML = iters.map((x, i) => {
+    const isBest = x.total === bestTotal;
+    return `<div class="refine-iter">
+      <div class="refine-iter-head">
+        <span><b>${x.iter === 0 ? '원본' : `개선 ${x.iter}`}</b> · ${x.scores ? Object.entries(x.scores).map(([k,v]) => `${k} ${v}`).join(' / ') : ''}</span>
+        <span class="refine-score ${isBest ? 'best' : ''}">${x.total}/50${isBest?' ★ BEST':''}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--muted2);font-style:italic;margin-bottom:6px">${esc((x.critique||'').slice(0, 200))}${(x.critique||'').length>200?'...':''}</div>
+      <details><summary style="font-size:0.72rem;color:var(--cyan);cursor:pointer">결과 보기 (${x.content.length}자)</summary>
+        <div style="font-size:0.78rem;white-space:pre-wrap;background:var(--s1);padding:10px;border-radius:6px;margin-top:6px;max-height:300px;overflow-y:auto">${esc(x.content)}</div>
+      </details>
+    </div>`;
+  }).join('');
+}
+
+async function judgeContent(content, type, topic) {
+  const sys = `당신은 한국 마케팅 콘텐츠의 매서운 편집장입니다. 아래 콘텐츠를 5가지 기준으로 1-10점 평가하고 비평하세요.
+기준:
+- 후킹 (첫 줄/제목이 끌어당기는가)
+- 명확성 (메시지가 분명한가)
+- 톤 (브랜드 보이스에 맞는가, AI 냄새 없는가)
+- 행동유도 (CTA가 강력한가)
+- 한국어 자연스러움 (어색한 표현, 직역체 없음)
+
+반드시 JSON으로만 응답:
+{"scores":{"후킹":8,"명확성":7,"톤":6,"행동유도":5,"한국어":9},"total":35,"critique":"한 문단으로 가장 개선이 필요한 점을 구체적으로 지적"}`;
+  const user = `[유형] ${type}\n[주제] ${topic}\n\n[콘텐츠]\n${content}`;
+  const r = await callLLMOnce(sys, user);
+  const j = extractJSON(r);
+  if (!j) return { scores: {}, total: 0, critique: '평가 파싱 실패' };
+  if (!j.total) j.total = Object.values(j.scores || {}).reduce((s,v) => s + (parseInt(v)||0), 0);
+  return j;
+}
+
+async function reviseContent(content, type, topic, critique) {
+  const sys = `당신은 한국 마케팅 카피 리라이터입니다. 아래 비평을 반영해 콘텐츠를 개선하세요. 길이는 비슷하게 유지하되 약점을 정확히 보완하세요. 결과 텍스트만 반환 (설명/머릿말 없이).`;
+  const user = `[유형] ${type}\n[주제] ${topic}\n\n[현재 콘텐츠]\n${content}\n\n[비평]\n${critique}`;
+  return await callLLMOnce(sys, user);
+}
+
+function extractJSON(text) {
+  if (!text) return null;
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try { return JSON.parse(m[0]); }
+  catch(e) {
+    // 따옴표/줄바꿈 정리 재시도
+    try { return JSON.parse(m[0].replace(/[“”]/g, '"').replace(/[‘’]/g, "'")); }
+    catch(e2) { return null; }
+  }
+}
+
+/* 단발 LLM 호출 (스트리밍 X, JSON 파싱 안정용) */
+async function callLLMOnce(system, user) {
+  if (!apiKey) throw new Error('API 키 미설정');
+  const FREE_MODELS = [
+    'google/gemini-2.0-flash-exp:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'openrouter/free',
+    'deepseek/deepseek-chat:free',
+  ];
+  let lastErr = null;
+  for (const model of FREE_MODELS) {
+    try {
+      const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': location.origin,
+          'X-Title': 'FlowAI'
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: user }
+          ],
+          temperature: 0.7,
+        })
+      });
+      if (!r.ok) { lastErr = new Error(`${model}: HTTP ${r.status}`); continue; }
+      const data = await r.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) { lastErr = new Error(`${model}: empty`); continue; }
+      return content;
+    } catch(e) { lastErr = e; }
+  }
+  throw lastErr || new Error('LLM 호출 실패');
+}
+
+/* 위키 컨텍스트 자동 주입: buildPrompt 래핑 */
+const _origBuildPrompt = buildPrompt;
+buildPrompt = function(type, topic, tone, audience, keywords, brandVoice, avoidWords) {
+  const result = _origBuildPrompt(type, topic, tone, audience, keywords, brandVoice, avoidWords);
+  const useCtx = document.getElementById('useWikiContext');
+  if (useCtx && useCtx.checked) {
+    const query = `${topic} ${keywords || ''} ${audience || ''}`;
+    const top = searchWiki(query, 3);
+    if (top.length) {
+      const ctx = top.map(p => `### ${p.title} (${p.category})\n${(p.body || '').slice(0, 800)}`).join('\n\n---\n\n');
+      result.system += `\n\n[관련 마케팅 지식 위키 — 이 정보를 적극 활용하세요]\n${ctx}`;
+    }
+  }
+  return result;
+};
+
+window.addEventListener('load', () => { setTimeout(updateWikiCtxInfo, 600); });
+
 </script>
 </body>
 </html>
