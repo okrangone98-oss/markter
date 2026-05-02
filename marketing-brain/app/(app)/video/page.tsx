@@ -331,7 +331,7 @@ export default function VideoPage() {
         id: uid(),
         title: s.title,
         body: s.body,
-        imageUrl: null,
+        imageUrl: s.imageUrl ?? null, // /remake 등에서 미리 생성된 이미지 자동 적용
         imageFile: null,
       }));
       setState((s) => ({ ...s, slides: newSlides }));

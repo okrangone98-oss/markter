@@ -39,7 +39,7 @@ type Phase =
   | "ready"
   | "error";
 
-interface SlideOutput extends ParsedSlide {
+interface SlideOutput extends Omit<ParsedSlide, "imageUrl"> {
   imageUrl: string | null;
   imageError?: string;
   warning?: string;
@@ -282,7 +282,14 @@ export default function RemakePage() {
   /* ── 4) /video 로 핸드오프 ── */
   function handleSendToVideo() {
     if (s.slides.length === 0) return;
-    setPendingSlides(s.slides.map((sl) => ({ title: sl.title, body: sl.body })));
+    // 생성된 이미지 URL 도 함께 전달 (ParsedSlide.imageUrl 옵션)
+    setPendingSlides(
+      s.slides.map((sl) => ({
+        title: sl.title,
+        body: sl.body,
+        imageUrl: sl.imageUrl ?? undefined,
+      }))
+    );
     router.push("/video");
   }
 
