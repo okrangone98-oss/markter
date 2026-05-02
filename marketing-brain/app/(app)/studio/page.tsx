@@ -26,6 +26,7 @@ import { TONE_MAP, TYPE_INSTRUCTIONS } from "@/lib/llm/prompts";
 import type { ContentType, ToneStyle } from "@/lib/llm/types";
 import { useTTSVideoStore } from "@/lib/stores/tts-video";
 import { parseScriptToSlides } from "@/lib/video/parse-script";
+import { HookModal } from "@/components/studio/hook-modal";
 
 // 콘텐츠 타입 한국어 라벨 (드롭다운 표시용)
 const TYPE_LABELS: Record<ContentType, string> = {
@@ -95,6 +96,7 @@ export default function StudioPage() {
   const [customVoice, setCustomVoice] = useState("");
   const [customAvoid, setCustomAvoid] = useState("");
   const [model, setModel] = useState<string>(""); // "" = 무료 폴백
+  const [hookOpen, setHookOpen] = useState(false);
 
   // ── 결과 상태 ──
   const [result, setResult] = useState("");
@@ -288,7 +290,18 @@ export default function StudioPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label>주제 *</Label>
+            <div className="flex items-center justify-between">
+              <Label>주제 *</Label>
+              <Tooltip content="첫 1-2문장에 적용할 후킹 공식 5가지 — 클릭 시 주제 앞에 [HOOK:이름] 자동 삽입">
+                <button
+                  type="button"
+                  onClick={() => setHookOpen(true)}
+                  className="text-[11px] text-[var(--color-primary)] hover:underline"
+                >
+                  🎯 바이럴 훅
+                </button>
+              </Tooltip>
+            </div>
             <Textarea
               rows={3}
               value={topic}
@@ -410,6 +423,16 @@ export default function StudioPage() {
           )}
         </div>
       </div>
+
+      <HookModal
+        open={hookOpen}
+        onClose={() => setHookOpen(false)}
+        onSelect={(hook) => {
+          // 이미 [HOOK:..] 태그가 있으면 교체, 없으면 앞에 추가
+          const cleaned = topic.replace(/^\[HOOK:[^\]]+\]\s*/, "");
+          setTopic(`[HOOK:${hook.name}] ${cleaned}`.trim());
+        }}
+      />
     </div>
   );
 }

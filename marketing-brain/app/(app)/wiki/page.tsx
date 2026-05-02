@@ -33,6 +33,19 @@ export default function WikiPage() {
 
   useEffect(() => { fetchPages(); }, [fetchPages]);
 
+  // Phase 1 세컨드브레인: 위키가 비어있으면 1회 자동 시드 (sessionStorage 가드 + API idempotent)
+  useEffect(() => {
+    if (loading) return;
+    if (pages.length > 0) return;
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("wiki_seed_attempted") === "1") return;
+    sessionStorage.setItem("wiki_seed_attempted", "1");
+    fetch("/api/wiki/seed", { method: "POST" })
+      .then((r) => r.json())
+      .then((j) => { if (j.created > 0) fetchPages(); })
+      .catch(() => { /* 실패는 조용히 — 사용자가 수동으로 페이지 만들 수 있음 */ });
+  }, [loading, pages.length, fetchPages]);
+
   const currentPage = pages.find((p) => p.id === currentPageId) || null;
 
   return (
