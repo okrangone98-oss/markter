@@ -39,18 +39,6 @@ export default function LoginPage() {
             <LoginButton />
           </Suspense>
         </div>
-
-        <p className="mt-6 text-center text-[11px] text-slate-600">
-          v0.1 (단일 HTML)을 쓰려면{" "}
-          <a
-            href="https://okrangone98-oss.github.io/markter/"
-            className="text-[var(--color-primary)] hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            여기
-          </a>
-        </p>
       </div>
     </div>
   );

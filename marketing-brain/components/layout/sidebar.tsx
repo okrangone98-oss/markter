@@ -32,35 +32,35 @@ type NavGroup = {
   items: NavItem[];
 };
 
-// 사이드바 메뉴 구성 — PRD §5 폴더 구조와 일치
+// 사이드바 메뉴 구성 — PRD §5 폴더 구조와 일치 (전체 한국어로 통일)
 const NAV_GROUPS: NavGroup[] = [
   {
     title: "분석",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/insights", label: "Insights", icon: TrendingUp },
+      { href: "/dashboard", label: "대시보드", icon: LayoutDashboard },
+      { href: "/insights", label: "인사이트", icon: TrendingUp },
     ],
   },
   {
     title: "지식",
     items: [
-      { href: "/wiki", label: "Wiki", icon: BookOpen },
-      { href: "/personas", label: "Personas", icon: Users },
-      { href: "/competitors", label: "Competitors", icon: Swords },
-      { href: "/trends", label: "Trends", icon: Radar },
+      { href: "/wiki", label: "위키", icon: BookOpen },
+      { href: "/personas", label: "페르소나", icon: Users },
+      { href: "/competitors", label: "경쟁사", icon: Swords },
+      { href: "/trends", label: "트렌드", icon: Radar },
     ],
   },
   {
     title: "생성",
     items: [
-      { href: "/studio", label: "Studio", icon: WandSparkles },
+      { href: "/studio", label: "콘텐츠 스튜디오", icon: WandSparkles },
       { href: "/tts", label: "AI 음성 (TTS)", icon: Mic2 },
       { href: "/video", label: "영상 메이커", icon: Film },
     ],
   },
   {
     title: "성장",
-    items: [{ href: "/coach", label: "Coach", icon: Sparkles }],
+    items: [{ href: "/coach", label: "성장 코치", icon: Sparkles }],
   },
   {
     title: "도구함",

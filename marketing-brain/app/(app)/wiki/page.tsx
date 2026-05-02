@@ -17,6 +17,7 @@ import { renderWikiMarkdown, findBacklinks } from "@/lib/wiki/markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip } from "@/components/ui/tooltip";
 import { UploadDialog } from "@/components/wiki/upload-dialog";
 
 /* ══════════════════════════════════════════════════════════
@@ -31,7 +32,7 @@ export default function WikiPage() {
   const currentPage = pages.find((p) => p.id === currentPageId) || null;
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] gap-4">
+    <div className="flex h-[calc(100vh-5.5rem)] gap-4">
       <WikiSidebar onUploadClick={() => setUploadOpen(true)} />
       <main className="flex-1 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40 p-6">
         {loading && pages.length === 0 ? (
@@ -135,16 +136,20 @@ function WikiSidebar({ onUploadClick }: { onUploadClick: () => void }) {
         )}
       </div>
 
-      <div className="border-t border-slate-800 pt-3 space-y-1">
+      <div className="border-t border-slate-800 pt-3 space-y-1 opacity-60">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
-          ⚡ AI 작업 (준비 중)
+          ⚡ AI 작업 (다음 마일스톤)
         </div>
-        <button className="w-full rounded px-2 py-1.5 text-left text-xs text-slate-500 hover:bg-slate-800/40" disabled>
-          📥 인제스트
-        </button>
-        <button className="w-full rounded px-2 py-1.5 text-left text-xs text-slate-500 hover:bg-slate-800/40" disabled>
-          ❓ 쿼리
-        </button>
+        <Tooltip content="텍스트·URL을 붙여넣으면 LLM이 위키 페이지를 자동 제안. pgvector RAG 연결 후 활성화됩니다.">
+          <button className="w-full rounded px-2 py-1.5 text-left text-xs text-slate-500 cursor-not-allowed" disabled>
+            📥 인제스트
+          </button>
+        </Tooltip>
+        <Tooltip content="자연어 질문 → 위키 의미 검색 → LLM 답변. pgvector 임베딩 적용 후 활성화됩니다.">
+          <button className="w-full rounded px-2 py-1.5 text-left text-xs text-slate-500 cursor-not-allowed" disabled>
+            ❓ 쿼리
+          </button>
+        </Tooltip>
       </div>
 
       <div className="border-t border-slate-800 pt-3 space-y-1">
@@ -321,15 +326,18 @@ function WikiDashboard({ pages, onUploadClick }: { pages: WikiPage[]; onUploadCl
             gaps.map((g) => (
               <button
                 key={g.cat}
-                onClick={() => filterByCategory(g.cat)}
+                onClick={() =>
+                  g.count === 0 ? createPage({ category: g.cat }) : filterByCategory(g.cat)
+                }
                 className="w-full text-left flex items-center justify-between gap-2 px-2 py-1.5 rounded hover:bg-slate-800/40"
+                title={g.count === 0 ? `${g.cat} 첫 페이지 만들기` : `${g.cat} 카테고리 보기`}
               >
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-slate-200">
                     {WIKI_CATEGORY_ICONS[g.cat]} {g.cat}
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">
-                    {g.count === 0 ? "비어있음 — 보강 필요" : `단 ${g.count}개 — 추가 권장`}
+                    {g.count === 0 ? "비어있음 — 클릭하여 새 페이지 만들기 +" : `단 ${g.count}개 — 추가 권장`}
                   </div>
                 </div>
                 <GapBadge severity={g.severity as "critical" | "low"} />
