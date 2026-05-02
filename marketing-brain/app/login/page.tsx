@@ -1,41 +1,15 @@
 // 로그인 페이지 — Google OAuth 시작점
+// useSearchParams() 는 Next.js 15+ 에서 Suspense 경계 필요 (정적 prerender 회피).
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Brain } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function signInWithGoogle() {
-    setLoading(true);
-    setError(null);
-    try {
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-        },
-      });
-      if (error) throw error;
-      // OAuth 리다이렉트가 시작되면 이 라인 이후는 실행되지 않음
-    } catch (e) {
-      setError((e as Error).message);
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4">
       <div className="w-full max-w-sm">
@@ -61,30 +35,9 @@ export default function LoginPage() {
             구글 계정으로 시작하세요. 데이터는 Supabase에 안전하게 저장됩니다.
           </p>
 
-          <Button
-            onClick={signInWithGoogle}
-            disabled={loading}
-            className="w-full bg-white text-slate-900 hover:bg-slate-100"
-            size="lg"
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
-                구글 로그인 진행 중...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2.5">
-                <GoogleIcon />
-                Google 로 로그인
-              </span>
-            )}
-          </Button>
-
-          {error && (
-            <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
-              ⚠ {error}
-            </div>
-          )}
+          <Suspense fallback={<LoginButtonFallback />}>
+            <LoginButton />
+          </Suspense>
         </div>
 
         <p className="mt-6 text-center text-[11px] text-slate-600">
@@ -103,6 +56,75 @@ export default function LoginPage() {
   );
 }
 
+function LoginButtonFallback() {
+  return (
+    <Button disabled className="w-full bg-white text-slate-900" size="lg">
+      <span className="flex items-center gap-2.5">
+        <GoogleIcon />
+        Google 로 로그인
+      </span>
+    </Button>
+  );
+}
+
+function LoginButton() {
+  const params = useSearchParams();
+  const next = params.get("next") || "/dashboard";
+  const errorParam = params.get("error");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(errorParam);
+
+  async function signInWithGoogle() {
+    setLoading(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const origin = window.location.origin;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) throw error;
+      // OAuth 리다이렉트가 시작되면 이 라인 이후는 실행되지 않음
+    } catch (e) {
+      setError((e as Error).message);
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <Button
+        onClick={signInWithGoogle}
+        disabled={loading}
+        className="w-full bg-white text-slate-900 hover:bg-slate-100"
+        size="lg"
+      >
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+            구글 로그인 진행 중...
+          </span>
+        ) : (
+          <span className="flex items-center gap-2.5">
+            <GoogleIcon />
+            Google 로 로그인
+          </span>
+        )}
+      </Button>
+
+      {error && (
+        <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+          ⚠ {error}
+        </div>
+      )}
+    </>
+  );
+}
+
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -113,3 +135,4 @@ function GoogleIcon() {
     </svg>
   );
 }
+
