@@ -18,6 +18,10 @@ interface TTSVideoStore {
   // Studio → Video 슬라이드 자동 채우기
   pendingSlides: ParsedSlide[] | null;
   setPendingSlides: (slides: ParsedSlide[] | null) => void;
+
+  // Studio → TTS 텍스트 자동 채우기
+  pendingTtsText: string | null;
+  setPendingTtsText: (text: string | null) => void;
 }
 
 export const useTTSVideoStore = create<TTSVideoStore>((set) => ({
@@ -26,4 +30,7 @@ export const useTTSVideoStore = create<TTSVideoStore>((set) => ({
 
   pendingSlides: null,
   setPendingSlides: (slides) => set({ pendingSlides: slides }),
+
+  pendingTtsText: null,
+  setPendingTtsText: (text) => set({ pendingTtsText: text }),
 }));

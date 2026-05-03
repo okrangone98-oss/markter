@@ -60,6 +60,28 @@ interface VideoState {
   rendered: { blob: Blob; url: string; ext: string } | null;
 }
 
+/* ── TTS 보이스 ── */
+type TtsEngine = "puter" | "elevenlabs";
+interface TtsVoiceOption { id: string; name: string; }
+
+const PUTER_VOICES: TtsVoiceOption[] = [
+  { id: "Seoyeon", name: "서연 (한국어 여성)" },
+  { id: "Jihye", name: "지혜 (한국어 여성 2)" },
+  { id: "Jimin", name: "지민 (한국어 남성)" },
+  { id: "Joanna", name: "Joanna (영어 여성)" },
+  { id: "Matthew", name: "Matthew (영어 남성)" },
+  { id: "Léa", name: "Léa (프랑스어 여성)" },
+  { id: "Takumi", name: "Takumi (일본어 남성)" },
+];
+
+const ELEVENLABS_VOICES: TtsVoiceOption[] = [
+  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel (다국어)" },
+  { id: "EXAVITQu4vr4xnSDxMaL", name: "Bella (소프트)" },
+  { id: "ErXwobaYiN019PkySvjV", name: "Antoni (남성)" },
+  { id: "TxGEqnHWrfWFTfGW9XjX", name: "Josh (청년 남성)" },
+  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam (서술형)" },
+];
+
 /* ── 상수 ── */
 const RATIO_DIM: Record<Ratio, { w: number; h: number }> = {
   "9:16": { w: 720, h: 1280 },
@@ -310,6 +332,11 @@ export default function VideoPage() {
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
   const [toast, setToast] = useState("");
+  const [generatingTTS, setGeneratingTTS] = useState(false);
+  const [generatingAllImg, setGeneratingAllImg] = useState(false);
+  const [ttsEngine, setTtsEngine] = useState<TtsEngine>("puter");
+  const [ttsVoice, setTtsVoice] = useState("Seoyeon");
+  const [elevenLabsKey, setElevenLabsKey] = useState("");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
@@ -323,6 +350,16 @@ export default function VideoPage() {
       setState((s) => ({ ...s, narration: ttsResult }));
     }
   }, [ttsResult]);
+
+  /* Puter SDK 동적 로드 */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (document.getElementById("puter-sdk")) return;
+    const s = document.createElement("script");
+    s.id = "puter-sdk";
+    s.src = "https://js.puter.com/v2/";
+    document.head.appendChild(s);
+  }, []);
 
   /* Studio → Video: pendingSlides 자동 임포트 (한 번만 소비 후 초기화) */
   useEffect(() => {
@@ -442,27 +479,55 @@ export default function VideoPage() {
     updateSlide(id, { imageFile: file, imageUrl: url });
   }
 
+  function extractConcept(title: string, body: string): string {
+    const raw = (title + " " + body).trim();
+    const keywords = raw.replace(/[\[\]\(\)"']/g, "").split(/[,\.\!\?\n]+/).map(s => s.trim()).filter(s => s.length > 2).slice(0, 3);
+    return keywords.join(", ");
+  }
+
   async function generateSlideImage(id: string) {
     const sl = state.slides.find((s) => s.id === id);
     if (!sl) return;
-    const prompt = (sl.title + " " + sl.body).trim();
-    if (!prompt) { showToast("⚠ 제목/본문을 먼저 입력하세요"); return; }
-    const w = window as unknown as { puter?: { ai?: { txt2img?: (p: string, o: Record<string, unknown>) => Promise<{ src: string }> } } };
+    const concept = extractConcept(sl.title, sl.body);
+    if (!concept) { showToast("⚠ 제목/본문을 먼저 입력하세요"); return; }
+    const w = window as any;
     if (!w.puter?.ai?.txt2img) { showToast("⚠ Puter SDK 미로드 — 잠시 후 다시 시도"); return; }
-    showToast("🎨 이미지 생성 중...");
+    showToast(`🎨 #${state.slides.indexOf(sl) + 1} 이미지 생성 중...`);
     try {
       const dim = RATIO_DIM[state.ratio];
-      const img = await w.puter.ai.txt2img(prompt + ", cinematic, high quality", {
-        model: "flux-schnell",
-        width: dim.w,
-        height: dim.h,
-        testMode: false,
-      });
+      const img = await w.puter.ai.txt2img(
+        `${concept}, cinematic photography, dramatic lighting, high quality, 4k, storytelling visual`,
+        { model: "flux-schnell", width: dim.w, height: dim.h, testMode: false }
+      );
       updateSlide(id, { imageUrl: img.src, imageFile: null });
       showToast("✓ 이미지 생성 완료");
     } catch (e: unknown) {
       showToast("⚠ 이미지 생성 실패: " + ((e as Error).message || ""));
     }
+  }
+
+  async function generateAllImages() {
+    const w = window as any;
+    if (!w.puter?.ai?.txt2img) { showToast("⚠ Puter SDK 미로드"); return; }
+    setGeneratingAllImg(true);
+    showToast(`🎨 전체 ${state.slides.length}장 이미지 생성 시작...`);
+    for (let i = 0; i < state.slides.length; i++) {
+      const sl = state.slides[i];
+      if (sl.imageUrl) continue;
+      const concept = extractConcept(sl.title, sl.body);
+      if (!concept) continue;
+      try {
+        const dim = RATIO_DIM[state.ratio];
+        const img = await w.puter.ai.txt2img(
+          `${concept}, cinematic photography, dramatic lighting, high quality, 4k, storytelling visual`,
+          { model: "flux-schnell", width: dim.w, height: dim.h, testMode: false }
+        );
+        updateSlide(sl.id, { imageUrl: img.src, imageFile: null });
+        showToast(`✓ ${i + 1}/${state.slides.length} 이미지 완료`);
+      } catch { showToast(`⚠ #${i + 1} 이미지 실패 — 건너뜀`); }
+    }
+    setGeneratingAllImg(false);
+    showToast("✓ 전체 이미지 생성 완료!");
   }
 
   function onBgmFile(file: File) {
@@ -479,6 +544,46 @@ export default function VideoPage() {
       ...s,
       narration: { name: file.name, blob: file, url },
     }));
+  }
+
+  async function generateSlideTTS() {
+    const text = state.slides.map(s => s.body || s.title).join(" ... ").trim();
+    if (!text || text === " ... ") { showToast("⚠ 슬라이드에 텍스트가 없습니다."); return; }
+    setGeneratingTTS(true);
+
+    if (ttsEngine === "elevenlabs") {
+      if (!elevenLabsKey) { showToast("⚠ ElevenLabs API 키를 입력하세요."); setGeneratingTTS(false); return; }
+      showToast("🎙 ElevenLabs 음성 생성 중...");
+      try {
+        const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ttsVoice}`, {
+          method: "POST",
+          headers: { "xi-api-key": elevenLabsKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ text, model_id: "eleven_multilingual_v2", voice_settings: { stability: 0.5, similarity_boost: 0.75 } }),
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        setState((s) => ({ ...s, narration: { name: `elevenlabs_${ttsVoice}.mp3`, blob, url } }));
+        showToast("✓ ElevenLabs 내레이션 생성 완료!");
+      } catch (e: any) { showToast("⚠ ElevenLabs 실패: " + e.message); }
+      finally { setGeneratingTTS(false); }
+      return;
+    }
+
+    showToast(`🎙 Puter TTS (${ttsVoice}) 음성 생성 중...`);
+    try {
+      const w = window as any;
+      if (!w.puter?.ai?.txt2speech) throw new Error("Puter SDK가 아직 준비되지 않았습니다. 새로고침 해주세요.");
+      const audio = await w.puter.ai.txt2speech(text, { voice: ttsVoice, engine: "neural" });
+      const src = audio.src || audio.currentSrc;
+      if (!src) throw new Error("오디오 소스를 받을 수 없습니다.");
+      const resp = await fetch(src);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      setState((s) => ({ ...s, narration: { name: `puter_${ttsVoice}.mp3`, blob, url } }));
+      showToast("✓ 내레이션 자동 생성 완료!");
+    } catch (e: any) { showToast("⚠ 음성 생성 실패: " + e.message); }
+    finally { setGeneratingTTS(false); }
   }
 
   /* ── WebM/MP4 렌더링 ── */
@@ -790,11 +895,49 @@ export default function VideoPage() {
               </div>
 
               {/* 내레이션 */}
-              <div className="space-y-1.5">
+              <div className="space-y-2.5">
                 <Label className="flex items-center gap-1.5">
-                  <Mic className="h-3.5 w-3.5" /> 내레이션 (TTS 음성)
+                  <Mic className="h-3.5 w-3.5" /> 내레이션 (AI TTS 음성)
                 </Label>
-                <div className="flex items-center gap-2">
+
+                {/* 엔진 + 보이스 선택 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={ttsEngine}
+                    onChange={(e) => {
+                      const eng = e.target.value as TtsEngine;
+                      setTtsEngine(eng);
+                      setTtsVoice(eng === "puter" ? PUTER_VOICES[0].id : ELEVENLABS_VOICES[0].id);
+                    }}
+                    className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100"
+                  >
+                    <option value="puter">⚡ Puter (무료)</option>
+                    <option value="elevenlabs">💎 ElevenLabs</option>
+                  </select>
+                  <select
+                    value={ttsVoice}
+                    onChange={(e) => setTtsVoice(e.target.value)}
+                    className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100"
+                  >
+                    {(ttsEngine === "puter" ? PUTER_VOICES : ELEVENLABS_VOICES).map((v) => (
+                      <option key={v.id} value={v.id}>{v.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* ElevenLabs 키 입력 */}
+                {ttsEngine === "elevenlabs" && (
+                  <Input
+                    type="password"
+                    placeholder="ElevenLabs API Key"
+                    value={elevenLabsKey}
+                    onChange={(e) => setElevenLabsKey(e.target.value)}
+                    className="h-7 text-xs"
+                  />
+                )}
+
+                {/* 파일 업로드 + 생성 버튼 */}
+                <div className="flex flex-wrap items-center gap-2">
                   <label className="cursor-pointer">
                     <input
                       type="file"
@@ -806,19 +949,26 @@ export default function VideoPage() {
                       <Upload className="h-3.5 w-3.5" /> 파일 업로드
                     </span>
                   </label>
-                  <span className="flex-1 truncate text-xs text-slate-500">
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs bg-slate-800 border-slate-700 hover:bg-[var(--color-primary)]/20 hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/50 text-slate-300"
+                    onClick={generateSlideTTS}
+                    disabled={generatingTTS}
+                  >
+                    <Mic className="h-3 w-3 mr-1" />
+                    {generatingTTS ? "생성 중..." : "🎙 AI 음성 생성"}
+                  </Button>
+
+                  <span className="flex-1 truncate text-xs text-slate-500 w-full mt-1">
                     {state.narration
-                      ? state.narration.name
+                      ? `✓ ${state.narration.name}`
                       : ttsResult
                       ? "TTS 페이지 음성 연결됨 ✓"
-                      : "없음"}
+                      : "음성을 생성하거나 파일을 업로드하세요"}
                   </span>
                 </div>
-                {!ttsResult && !state.narration && (
-                  <p className="text-[11px] text-slate-600">
-                    💡 AI 음성 페이지에서 생성 후 여기에 자동 연결됩니다.
-                  </p>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -833,9 +983,20 @@ export default function VideoPage() {
                     {state.slides.length}장 · 약 {totalDuration.toFixed(1)}초
                   </span>
                 </CardTitle>
-                <Button variant="secondary" size="sm" onClick={addSlide}>
-                  <Plus className="h-4 w-4" /> 슬라이드 추가
-                </Button>
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={generateAllImages}
+                    disabled={generatingAllImg || state.slides.length === 0}
+                    className="text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  >
+                    {generatingAllImg ? "생성 중..." : "🎨 전체 AI 이미지"}
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={addSlide}>
+                    <Plus className="h-4 w-4" /> 슬라이드 추가
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>

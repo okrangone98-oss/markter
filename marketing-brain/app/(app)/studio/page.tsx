@@ -13,6 +13,7 @@ import {
   Download,
   RefreshCw,
   Film,
+  Mic,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ const PROFILE_LABELS: Record<string, string> = {
 // 그 외는 OpenRouter 가 라우팅 — 사용자의 OpenRouter BYOK 키 필요
 const MODEL_OPTIONS: Array<{ id: string; label: string; tier: "free" | "paid" }> = [
   { id: "", label: "🆓 무료 (Gemini Flash · Llama 3.3 폴백)", tier: "free" },
+  { id: "tencent/hy3-preview:free", label: "🆓 Tencent Hy3 (295B MoE · 무료)", tier: "free" },
   { id: "openai/gpt-5", label: "💎 GPT-5 (OpenAI)", tier: "paid" },
   { id: "openai/gpt-5.5", label: "💎 GPT-5.5 (최신)", tier: "paid" },
   { id: "anthropic/claude-sonnet-4.6", label: "💎 Claude Sonnet 4.6", tier: "paid" },
@@ -85,6 +87,7 @@ const MODEL_OPTIONS: Array<{ id: string; label: string; tier: "free" | "paid" }>
 export default function StudioPage() {
   const router = useRouter();
   const setPendingSlides = useTTSVideoStore((s) => s.setPendingSlides);
+  const setPendingTtsText = useTTSVideoStore((s) => s.setPendingTtsText);
 
   // ── 폼 상태 ──
   const [profile, setProfile] = useState<string>("pakchaenam");
@@ -176,6 +179,19 @@ export default function StudioPage() {
     if (slides.length === 0) return;
     setPendingSlides(slides);
     router.push("/video");
+  }
+
+  function handleSendToTTS() {
+    if (!result.trim()) return;
+    // [0~5초], [10.5~15초], [00:00~00:05] 등 시간 구간 마커 삭제
+    const filteredText = result
+      .replace(/\[\d+(?:\.\d+)?\s*~\s*\d+(?:\.\d+)?초\]/g, "")
+      .replace(/\[\d+:\d+\s*~\s*\d+:\d+\]/g, "")
+      .replace(/\n\s*\n/g, "\n\n")
+      .trim();
+    
+    setPendingTtsText(filteredText);
+    router.push("/tts");
   }
 
   return (
@@ -392,6 +408,17 @@ export default function StudioPage() {
                 >
                   <RefreshCw className="h-3 w-3" /> 재생성
                 </Button>
+                <Tooltip content="시간 구간 마커를 제외한 대사만 음성 메이커로 전송합니다.">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSendToTTS}
+                    disabled={generating || !result.trim()}
+                    className="h-7 text-xs text-amber-400 hover:text-amber-300"
+                  >
+                    <Mic className="h-3 w-3 mr-1" /> 음성 메이커로
+                  </Button>
+                </Tooltip>
                 <Tooltip content="결과를 자동으로 슬라이드로 분할해 영상 메이커에 전송합니다.">
                   <Button
                     variant="ghost"
@@ -400,7 +427,7 @@ export default function StudioPage() {
                     disabled={generating || !result.trim()}
                     className="h-7 text-xs text-[var(--color-primary)]"
                   >
-                    <Film className="h-3 w-3" /> 영상 메이커로
+                    <Film className="h-3 w-3 mr-1" /> 영상 메이커로
                   </Button>
                 </Tooltip>
               </div>

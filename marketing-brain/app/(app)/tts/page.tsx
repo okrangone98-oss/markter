@@ -8,8 +8,13 @@ import {
   RefreshCw,
   Volume2,
   Trash2,
+  Save,
+  Library,
+  PlayCircle
 } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { UserAudio, uploadAudio, fetchUserAudios, deleteUserAudio } from "@/lib/supabase/audios";
 
 import { cn } from "@/lib/utils";
 import { useTTSVideoStore } from "@/lib/stores/tts-video";
@@ -106,7 +111,7 @@ function charEstimateSec(text: string): number {
    TTS 페이지 컴포넌트
    ══════════════════════════════════════════════════════════ */
 export default function TTSPage() {
-  const { setTTSResult } = useTTSVideoStore();
+  const { setTTSResult, pendingTtsText, setPendingTtsText } = useTTSVideoStore();
 
   const [engine, setEngine] = useState<Engine>("neural");
   const [voices, setVoices] = useState<VoiceOption[]>([]);
@@ -117,6 +122,9 @@ export default function TTSPage() {
   const [pitch, setPitch] = useState(1.0);
 
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [library, setLibrary] = useState<UserAudio[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [synthEl, setSynthEl] = useState<HTMLElement | null>(null); // SpeechSynthesis 전용
@@ -125,6 +133,25 @@ export default function TTSPage() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const resultBlobRef = useRef<Blob | null>(null);
   const resultUrlRef = useRef<string | null>(null);
+
+  /* 유저 및 라이브러리 초기화 */
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setUserId(data.user.id);
+        fetchUserAudios().then(setLibrary).catch(() => {});
+      }
+    });
+  }, []);
+
+  /* Studio → TTS 텍스트 자동 채우기 */
+  useEffect(() => {
+    if (pendingTtsText) {
+      setText(pendingTtsText);
+      setPendingTtsText(null); // 1회 소비 후 초기화
+    }
+  }, [pendingTtsText, setPendingTtsText]);
 
   /* 엔진 변경 시 보이스 목록 갱신 */
   useEffect(() => {
@@ -285,6 +312,49 @@ export default function TTSPage() {
     a.href = url;
     a.download = `marketing-brain-voice-${Date.now()}.${ext}`;
     a.click();
+  }
+
+  async function saveToLibrary() {
+    const blob = resultBlobRef.current;
+    if (!blob || !userId) {
+      showToast("⚠ 저장할 수 없습니다. 로그인 상태와 음성을 확인하세요.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const audioTitle = text.trim().slice(0, 20) || "새 음성";
+      const record = await uploadAudio(blob, audioTitle, engine, userId);
+      setLibrary((prev) => [record, ...prev]);
+      showToast("✓ 라이브러리에 저장되었습니다");
+    } catch (e: any) {
+      showToast("⚠ 저장 실패: " + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteLibrary(id: string, path: string) {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await deleteUserAudio(id, path);
+      setLibrary((prev) => prev.filter(a => a.id !== id));
+      showToast("✓ 삭제되었습니다");
+    } catch (e: any) {
+      showToast("⚠ 삭제 실패: " + e.message);
+    }
+  }
+
+  async function selectFromLibrary(item: UserAudio) {
+    try {
+      showToast("불러오는 중...");
+      const res = await fetch(item.public_url);
+      if (!res.ok) throw new Error("Fetch failed");
+      const blob = await res.blob();
+      setTTSResult({ blob, url: item.public_url, name: item.title + '.mp3' });
+      showToast(`✓ '${item.title}' 영상 메이커로 전달됨`);
+    } catch (e) {
+      showToast("⚠ 불러오기 실패");
+    }
   }
 
   /* ── 엔진별 함수 ── */
@@ -658,6 +728,15 @@ export default function TTSPage() {
                       <Download className="h-4 w-4" />
                       다운로드
                     </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={saveToLibrary}
+                      disabled={saving}
+                    >
+                      <Save className="h-4 w-4" />
+                      {saving ? "저장 중..." : "저장"}
+                    </Button>
                     <Button variant="secondary" size="sm" asChild>
                       <Link href="/video">
                         <Film className="h-4 w-4" />
@@ -698,6 +777,45 @@ export default function TTSPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* 오디오 라이브러리 */}
+      <Card className="mt-8">
+        <CardHeader className="pb-3 border-b border-slate-800">
+          <CardTitle className="flex items-center gap-2 text-base text-slate-100">
+            <Library className="h-4 w-4 text-[var(--color-primary)]" />
+            내 오디오 라이브러리
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {!userId ? (
+            <p className="text-sm text-slate-400">로그인 후 라이브러리를 사용할 수 있습니다.</p>
+          ) : library.length === 0 ? (
+            <p className="text-sm text-slate-500">저장된 오디오가 없습니다.</p>
+          ) : (
+            <div className="space-y-3">
+              {library.map((item) => (
+                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-slate-200 truncate">{item.title}</p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {new Date(item.created_at).toLocaleString()} · {item.engine}
+                    </p>
+                  </div>
+                  <audio src={item.public_url} controls className="h-8 w-full sm:w-48 shrink-0" />
+                  <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
+                    <Button variant="secondary" size="sm" onClick={() => selectFromLibrary(item)}>
+                      <Film className="h-3 w-3" /> 영상
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-950/30" onClick={() => handleDeleteLibrary(item.id, item.storage_path)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
